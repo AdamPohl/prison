@@ -1,0 +1,104 @@
+                 /*********************************************/
+                 /*         Iterated Prisoner's Dilemma       */
+                 /*                                           */
+                 /*        Pour la Science, vol 181, Nov 92   */
+                 /*        Pour la Science, vol 187, Mai 93   */
+                 /*        IOS Press, Chaos and Society, 95   */
+                 /*                                           */
+                 /*        Authors: Philippe  MATHIEU         */
+                 /*                 Jean-paul DELAHAYE        */
+                 /*                                           */
+                 /*        Date  : 06/06/92                   */
+                 /*        maj   : 16/04/96                   */
+                 /*                                           */
+                 /*   e-mail : {mathieu, delahaye}@lifl.fr    */
+                 /*********************************************/
+
+
+
+/***************************************************************************
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Contact the authors for more details.
+*****************************************************************************/
+
+
+
+/* 
+
+These strategies are built on the following scheme : 9 slaves
+strategies sacrify themselves to the master one.  When the master
+recognizes a slave strategy it exploit it to obtain the best possible
+score. In the other cases it plays as tit_for_tat
+
+*/
+
+
+card slave1(int X)
+{	if (turn==1) return COOPERATE;
+	if (turn<52) return DEFECT;
+	return COOPERATE;
+}
+
+
+card slave2(int X)
+{	if (turn==1) return COOPERATE;
+	if (turn<52) return DEFECT;
+	return COOPERATE;
+}
+
+card slave3(int X)
+{	if (turn==1) return COOPERATE;
+	if (turn<52) return DEFECT;
+	return COOPERATE;
+}
+
+card slave4(int X)
+{	if (turn==1) return COOPERATE;
+	if (turn<52) return DEFECT;
+	return COOPERATE;
+}
+
+card slave5(int X)
+{	if (turn==1) return COOPERATE;
+	if (turn<52) return DEFECT;
+	return COOPERATE;
+}
+
+card slave6(int X)
+{	if (turn==1) return COOPERATE;
+	if (turn<52) return DEFECT;
+	return COOPERATE;
+}
+
+card slave7(int X)
+{	if (turn==1) return COOPERATE;
+	if (turn<52) return DEFECT;
+	return COOPERATE;
+}
+
+card slave8(int X)
+{	if (turn==1) return COOPERATE;
+	if (turn<52) return DEFECT;
+	return COOPERATE;
+}
+
+card slave9(int X)
+{	if (turn==1) return COOPERATE;
+	if (turn<52) return DEFECT;
+	return COOPERATE;
+}
+
+card master(int X)
+{static counter cas;
+	if (turn==1) {cas[X]=0; return COOPERATE;}
+	if (cas[X]==1) return DEFECT;
+	if (turn>52 
+	    && RH[turn-52]==COOPERATE 
+	    && defect_lim(51,RH)==50 
+            && RH[turn-1]==COOPERATE)
+	{	cas[X]=1; return DEFECT;}
+	return tit_for_tat(X);
+}
+

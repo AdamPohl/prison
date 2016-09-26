@@ -1,0 +1,769 @@
+                 /*********************************************/
+                 /*         Iterated Prisoner's Dilemma       */
+                 /*                                           */
+                 /*        Pour la Science, vol 181, Nov 92   */
+                 /*        Pour la Science, vol 187, Mai 93   */
+                 /*        IOS Press, Chaos and Society, 95   */
+                 /*                                           */
+                 /*        Authors: Philippe  MATHIEU         */
+                 /*                 Jean-paul DELAHAYE        */
+                 /*                                           */
+                 /*        Date  : 06/06/92                   */
+                 /*        maj   : 16/04/96                   */
+                 /*                                           */
+                 /*   e-mail : {mathieu, delahaye}@lifl.fr    */
+                 /*********************************************/
+
+
+
+/***************************************************************************
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Contact the authors for more details.
+*****************************************************************************/
+
+
+card phil1(int X)
+{static counter ec;
+	if (turn>20 && score(MH)<1.5*(turn-1)) return RENOUNCE;
+	if (turn==1) {ec[X]=0; return COOPERATE;}
+	if (ec[X]==1 || ec[X]==2) {ec[X]--; return COOPERATE;}
+	if (ec[X]>2) {ec[X]--; return DEFECT;}
+	if (RH[turn-1]==DEFECT) {ec[X]=2*nbD(RH)+2-1; return DEFECT;}
+	return COOPERATE;
+}
+
+card phil2(int X)
+{static counter ec;
+/*	if (turn>20 && score(MH)<1.7*(turn-1)) return RENOUNCE; */
+	if (turn==1) {ec[X]=0; return COOPERATE;}
+	if (ec[X]==1 || ec[X]==2) {ec[X]--; return COOPERATE;}
+	if (ec[X]>2) {ec[X]--; return DEFECT;}
+	if (RH[turn-1]==DEFECT) {ec[X]=2*nbD(RH)+2-1; return DEFECT;}
+	return COOPERATE;
+}
+
+card phil3(int X)
+{static counter ec;
+/* 	if (turn>20 && score(MH)<1.2*(turn-1)) return RENOUNCE; */
+	if (turn==1) {ec[X]=0; return COOPERATE;}
+	if (ec[X]==1 || ec[X]==2) {ec[X]--; return COOPERATE;}
+	if (ec[X]>2) {ec[X]--; return DEFECT;}
+	if (RH[turn-1]==DEFECT) {ec[X]=2*nbD(RH)+2-1; return DEFECT;}
+	return COOPERATE;
+}
+
+
+/* Une strategie non deterministe pour le dilemne du prisonnier */
+/* par Marc Tommasi et Denis Robilliard */
+
+card maitre_tom(int X)		/* strategie maitre */
+{
+	static card tab[] = {DEFECT, DEFECT, DEFECT, DEFECT, COOPERATE, DEFECT,
+		COOPERATE, COOPERATE, DEFECT, DEFECT, COOPERATE, COOPERATE, COOPERATE, DEFECT,
+		DEFECT, DEFECT, DEFECT, DEFECT, DEFECT, COOPERATE};
+	int i, foo;
+	static counter esclave;
+	
+   if (turn == 1)		/* initialisation */
+   {	
+   	esclave[X] = 0;
+      return COOPERATE;
+   }
+   
+   if (turn < 30)		/* attend code desesperement */
+   	return RH[turn-1];
+   
+   if (turn == 30)		/* ais-je affaire a un esclave ? */
+   {
+   	foo = 1;
+   	for (i = 0; i < 20; i++)
+   		if (RH[i+10] != tab[i])
+   			foo = 0;
+   	esclave[X] = foo;
+   }
+
+	if ((turn < 50) && esclave[X])		/* renvoyer le code */
+		return tab[turn - 30];
+
+	if ((turn >= 50) && esclave[X])		/* profitons */
+		return DEFECT;
+		
+		/* sinon, jouer une variante de tit for tat en quittant si trop de
+			trahisons */
+		
+   if ((RH[turn-1] == DEFECT) && (RH[turn-2] == DEFECT)
+   	&& (RH[turn-3] == DEFECT) && (rand() % 3))
+      return RENOUNCE;
+
+   return RH[turn-1];
+}
+
+
+/* Une strategie deterministe pour le dilemne du prisonnier */
+/* par Marc Tommasi et Denis Robilliard */
+
+card esclave_tom(int X)		/* strategie esclave */
+{
+	static card tab[] = {DEFECT, DEFECT, DEFECT, DEFECT, COOPERATE, DEFECT,
+		COOPERATE, COOPERATE, DEFECT, DEFECT, COOPERATE, COOPERATE, COOPERATE, DEFECT,
+		DEFECT, DEFECT, DEFECT, DEFECT, DEFECT, COOPERATE};
+	int i, foo;
+	static counter maitre;
+	
+   if (turn == 1)		/* initialisation */
+   {	
+   	maitre[X] = 0;
+      return COOPERATE;
+   }
+   
+   if (turn < 10)		/* prepare code desesperement */
+   	return RH[turn-1];
+   
+	if (turn < 30)		/* envoyer le code */
+		return tab[turn - 10];
+
+   if (turn < 50)		/* attend code desesperement */
+   	return RH[turn-1];
+ 
+    if (turn == 50)		/* ais-je affaire a un maitre ? */
+   {
+   	foo = 1;
+   	for (i = 0; i < 20; i++)
+   		if (RH[i+30] != tab[i])
+   			foo = 0;
+   	maitre[X] = foo;
+   }
+
+	if ((turn >= 50) && maitre[X])		/* offrons */
+		return COOPERATE;
+		
+		/* sinon trahir */
+		
+    return DEFECT;
+
+}
+
+
+card meilleure45(int X)
+{static counter nb_trahis,en_cours,degre;
+	if (turn==1) {nb_trahis[X]=0;en_cours[X]=0;degre[X]=0;return COOPERATE;}
+	else if ((turn % 20) ==0 && (score(MH)*10)<((turn-1)*15))
+			return RENOUNCE;
+	else
+	{	if (en_cours[X] == 1 || en_cours[X] == 2)
+		{en_cours[X]--;return COOPERATE;}
+		else if (en_cours[X] >2)
+			{en_cours[X]--;return DEFECT;}
+		     else if (RH[turn -1]==DEFECT)
+			{nb_trahis[X]++;degre[X]+=nbD(RH);
+			 en_cours[X]=degre[X]+2-1;
+			 return DEFECT; }
+		     else return COOPERATE;
+	}
+}
+
+
+card meilleure80(int X)
+{static counter cas,cpt;
+	if (turn==1) {cas[X]=1; return COOPERATE;}
+	if (cas[X]==1)
+		if (turn>2 && RH[turn-1]==DEFECT && RH[turn-2]==DEFECT) {cas[X]=2; return DEFECT;}
+		else return COOPERATE;
+	if (cas[X]==2)
+		if (RH[turn-1]==COOPERATE) {cas[X]=1; return COOPERATE;}
+		else {cas[X]=3; cpt[X]=-1; return DEFECT;}
+	if (cas[X]==3)
+	{
+		if (RH[turn-1]==DEFECT) cpt[X]++;
+		if (cpt[X]<12) return DEFECT;
+		if (nbD(RH)>nbC(RH)) return RENOUNCE;
+		else {cas[X]=2; return COOPERATE;}
+	}	
+	printf("cas non prevu : strategie meilleure80 \n");
+}
+
+
+
+
+
+card meilleure101(int X)
+{static counter cpt,cum1,cum2,cum3,cum4,cas;
+/*	if (turn==1) {cpt[X]=2; return COOPERATE;} */
+	if (nbD(RH)==0) {cpt[X]=2; return COOPERATE;}
+
+	if (cpt[X]<=5) {cpt[X]++; return RH[turn-1];  /* tft */}
+	if (cpt[X]==6) cum1[X]=score_lim(4,MH);
+	if (cpt[X]<=10) {cpt[X]++; return COOPERATE; /* gentille */ }
+	if (cpt[X]==11) cum2[X]=score_lim(4,MH);
+	if (cpt[X]<=15) {cpt[X]++; return rancuniere(X);}  /* no static var in rancuniere */
+	if (cpt[X]==16) cum3[X]=score_lim(4,MH);
+	if (cpt[X]<=20) {cpt[X]++; return per_gentille(X); /* no static var in per_gentille */ }
+	if (cpt[X]==21)
+	{	cum4[X]=score_lim(4,MH);
+		cum1[X]*=3; cum2[X]*=3; cum3[X]*=3; cum4[X]*=3;
+	}
+	
+	if (cpt[X]>21 && (cpt[X]-21)%12==0)
+	{	if (cas[X]==1) cum1[X]=score_lim(12,MH);
+		if (cas[X]==2) cum2[X]=score_lim(12,MH);
+		if (cas[X]==3) cum3[X]=score_lim(12,MH);
+		if (cas[X]==4) cum4[X]=score_lim(12,MH);
+	}
+	if ((cpt[X]-21)%12==0)
+	{	
+		if (cum4[X]<24 && cum3[X]<24 && cum2[X]<24 && cum1[X]<24) return RENOUNCE; 
+
+		if (cum1[X]>=cum4[X] && cum1[X]>=cum3[X] && cum1[X]>=cum2[X]) cas[X]=1;
+		else if (cum2[X]>=cum4[X] && cum2[X]>=cum3[X] && cum2[X]>=cum1[X]) cas[X]=2;
+		else if (cum3[X]>=cum4[X] && cum3[X]>=cum2[X] && cum3[X]>=cum1[X]) cas[X]=3;
+		else if (cum4[X]>=cum3[X] && cum4[X]>=cum2[X] && cum4[X]>=cum1[X]) cas[X]=4;
+		else printf("probleme %d %d %d %d \n",cum1[X],cum2[X],cum3[X],cum4[X]);
+	}
+	cpt[X]++;
+	if (cas[X]==1) return RH[turn-1];       /* tft */
+	if (cas[X]==2) return gentille(X);      /* no static var in gentille */
+	if (cas[X]==3) return rancuniere(X);    /* no static var in rancuniere */
+	if (cas[X]==4) return per_gentille(X);  /* no static var in pergentille */
+	printf("cas non prevu: strat 101 amelioree %d, partie %d\n",cas[X], turn);
+}
+
+
+card dur(int X)
+{	if (turn>1 && RH[turn-1]==DEFECT) return RENOUNCE;
+	return DEFECT;
+}
+
+card sondeur_4coups(int X)
+{	if (turn==1) return COOPERATE;
+	if (turn==2) return COOPERATE;
+	if (turn==3) return DEFECT;
+	if (turn==4) return DEFECT;
+	if (turn==5 && nbD(RH)>=3) return RENOUNCE;
+	return COOPERATE;
+}
+
+card dd_avec_seuil(int X)
+{	if (turn==1) return COOPERATE;
+	if ((turn-1)%5==0 && score(MH)< 2*(turn-1)) return RENOUNCE;
+	return RH[turn-1];  /* tft */
+}
+
+
+
+/* autres Franchesci   */
+
+
+card tit_for_tat2(int X){
+if (turn==1) return COOPERATE;
+else
+        if ( (turn>2) && (RH[turn - 2]==DEFECT) )
+                return DEFECT;
+        else    return COOPERATE;}
+
+
+card tit_for_tat2_ext(int X){
+	if (turn==1) return COOPERATE;
+        if ( (turn>20) && (score(MH)/turn<2) )
+                return RENOUNCE;
+else
+        if ( (turn>2) && (RH[turn - 2]==DEFECT) )
+                return DEFECT;
+	else return COOPERATE;
+}
+
+
+
+card tit_for_tat3(int X){
+if (turn==1) return COOPERATE;
+else
+        if ( (turn>3) && (RH[turn - 3]==DEFECT) )
+                return DEFECT;
+        else    return COOPERATE;}
+
+card DDDI(int X){
+if (turn==1) return COOPERATE;
+else
+        if ( (turn>2) && (RH[turn-2]==DEFECT) )
+                if ( rand()%200 == 1)   return COOPERATE;
+                else return DEFECT;
+        else    return COOPERATE;}
+
+card DDDI_ext(int X){
+if (turn==1) return COOPERATE;
+if ( (turn>50) && ((score1/turn) <2) )
+        return RENOUNCE;
+else
+        if ( (turn>2) && (RH[turn-2]==DEFECT) )
+                if ( rand()%50 == 1)    return COOPERATE;
+                else return DEFECT;
+        else    return COOPERATE;}
+
+
+
+
+
+card jp_bruit(int X)
+{/*  apres 1er trahir, trahir 1 fois, apres nieme trahir, trahir n fois. Deux coop apres chaque serie */
+static counter nb_trahis, en_cours;
+	if (turn==1) {nb_trahis[X]=0; en_cours[X]=0; return COOPERATE;}
+	else
+	{	if (en_cours[X]==1 || en_cours[X]==2 ) 
+		{	en_cours[X]--; return COOPERATE;}
+		else if (en_cours[X]>2)
+			{	en_cours[X]--; return DEFECT;}
+		     else if (RH[turn - 1]==DEFECT)
+			{	
+				if (defect_lim(10,RH) > 1)
+				{	nb_trahis[X]++; en_cours[X]=nb_trahis[X]+2-1; return DEFECT; }
+				else COOPERATE;
+			}
+			else return COOPERATE;
+	}
+}
+
+
+
+
+card phil_bruit(int X)
+{static counter nb_trahis, en_cours;
+	if (turn==1) {nb_trahis[X]=0; en_cours[X]=0; return COOPERATE;}
+	else
+	{	if (en_cours[X]==1 || en_cours[X]==2) 
+		{	en_cours[X]--; return COOPERATE;}
+		else if (en_cours[X]>2)
+			{	en_cours[X]--; return DEFECT;}
+		     else if (RH[turn - 1]==DEFECT)
+			{	nb_trahis[X]++; en_cours[X]=nb_trahis[X]/2+2-1; return DEFECT; }
+			else return COOPERATE;
+	}
+}
+
+
+
+card grad_joss_bruit(int X)
+{static counter nb_trahis, en_cours;
+	if (turn==1) {nb_trahis[X]=0; en_cours[X]=0; return COOPERATE;}
+	else
+	{	if (en_cours[X]==1 || en_cours[X]==2) 
+		{	en_cours[X]--; return COOPERATE;}
+		else if (en_cours[X]>2)
+			{	en_cours[X]--; return DEFECT;}
+		     else if (RH[turn - 1]==DEFECT)
+			{	if (rand()%5 !=0)	
+				{	nb_trahis[X]++; en_cours[X]=nb_trahis[X]+2-1; return DEFECT; }
+				else COOPERATE;
+			}
+			else return COOPERATE;
+	}
+}
+
+
+
+card gradual_poly(int X)
+{static counter ec;
+	if (turn==1) {ec[X]=0; return COOPERATE;}
+	if (ec[X]==1 || ec[X]==2) {ec[X]--; return COOPERATE;}
+	if (ec[X]>2) {ec[X]--; return DEFECT;}
+	if (RH[turn-1]==DEFECT) {ec[X]=(nbD(RH)*(nbD(RH)+1)/2)+2-1; return DEFECT;}
+	return COOPERATE;
+}
+
+
+card gradual_best_phiphi(int X)
+{static counter def, calm ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; COOPERATE;}
+	
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+
+	i=defect_lim(5,RH);
+	
+	if (i!=0)
+	{	def[X]=(i*i)+i+3-1;
+		calm[X]=(15*i*i)+8*i+4;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+
+card gradual_gene(int X)
+{  static counter nb,def,calm;
+  if (turn==1)
+    {
+      nb[X]=0;
+      def[X]=0;
+      calm[X]=0;
+      return COOPERATE;
+    }
+  if (defect_lim(5,RH)>=1)
+    {
+      nb[X]++;
+      if (def[X]==0 && calm[X]==0)
+	{
+	  def[X]=((nb[X]*nb[X])+nb[X]+3);
+	  calm[X]=((15*nb[X]*nb[X])+8*nb[X]+4);
+	}
+    }
+  if (def[X]!=0)
+    {
+      def[X]--;
+      return DEFECT;
+    }
+  if (calm[X]!=0)
+    {
+      calm[X]--;
+      return COOPERATE;
+    }
+  return COOPERATE;
+}
+
+
+
+
+
+
+/* graduel normal */
+card gradual_A(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	trahis[X]++;	
+		def[X]=trahis[X]-1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+/* graduel normal  sauf qu'on compte toujours meme pendant la punition */
+card gradual_B(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (RH[turn-1]==DEFECT) trahis[X]++;
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	def[X]=trahis[X]-1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+
+
+/* graduel poly */
+card gradual_C(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	trahis[X]++;	
+		def[X]=((trahis[X]*(trahis[X]+1))/2) -1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+/* graduel poly  sauf qu'on compte toujours meme pendant la punition */
+card gradual_D(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (RH[turn-1]==DEFECT) trahis[X]++;
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	def[X]=((trahis[X]*(trahis[X]+1))/2) -1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+
+/* graduel ranc a 10 */
+card gradual_E(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (trahis[X]>=10) return DEFECT;
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	trahis[X]++;	
+		def[X]=trahis[X]-1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+/* graduel ranc a 10  sauf qu'on compte toujours meme pendant la punition */
+card gradual_F(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (trahis[X]>=10) return DEFECT;
+	if (RH[turn-1]==DEFECT) trahis[X]++;
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	def[X]=trahis[X]-1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+
+/* graduel n ranc a 5 */
+card gradual_G(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (trahis[X]>=5) return DEFECT;
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	trahis[X]++;	
+		def[X]=trahis[X]-1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+/* graduel n ranc a 5  sauf qu'on compte toujours meme pendant la punition */
+card gradual_H(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (trahis[X]>=5) return DEFECT;
+	if (RH[turn-1]==DEFECT) trahis[X]++;
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	def[X]=trahis[X]-1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+
+/* graduel ranc a 20 */
+card gradual_I(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (trahis[X]>=20) return DEFECT;
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	trahis[X]++;	
+		def[X]=trahis[X]-1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+/* graduel ranc a 20  sauf qu'on compte toujours meme pendant la punition */
+card gradual_J(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (trahis[X]>=20) return DEFECT;
+	if (RH[turn-1]==DEFECT) trahis[X]++;
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	def[X]=trahis[X]-1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+
+/* graduel 2n ranc a 10 */
+card gradual_K(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (trahis[X]>=10) return DEFECT;
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	trahis[X]++;	
+		def[X]=2*trahis[X]-1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+/* graduel 2n ranc a 10  sauf qu'on compte toujours meme pendant la punition */
+card gradual_L(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (trahis[X]>=10) return DEFECT;
+	if (RH[turn-1]==DEFECT) trahis[X]++;
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	def[X]=2*trahis[X]-1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+
+
+/* graduel n (tc)* a 10 */
+card gradual_M(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (trahis[X]>=10) 
+		if (MH[turn-1]==COOPERATE) return DEFECT; else return COOPERATE;
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	trahis[X]++;	
+		def[X]=2*trahis[X]-1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+/* graduel poly (tc)* a 10  sauf qu'on compte toujours meme pendant la punition */
+card gradual_N(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (trahis[X]>=10) 
+		if (MH[turn-1]==COOPERATE) return DEFECT; else return COOPERATE;
+	if (RH[turn-1]==DEFECT) trahis[X]++;
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	def[X]=2*trahis[X]-1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+
+/* graduel poly ranc a 5 */
+card gradual_O(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (trahis[X]>=5) return DEFECT;
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	trahis[X]++;	
+		def[X]=(trahis[X]*(trahis[X]+1))/2 -1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+/* graduel poly ranc a 5  sauf qu'on compte toujours meme pendant la punition */
+card gradual_P(int X)
+{static counter def, calm, trahis ;
+int i;
+	if (turn==1) {def[X]=0; calm[X]=0; trahis[X]=0; COOPERATE;}
+	if (trahis[X]>=5) return DEFECT;
+	if (RH[turn-1]==DEFECT) trahis[X]++;
+	if (def[X] != 0) {def[X]--; return DEFECT;}
+	if (calm[X] != 0) {calm[X]--; return COOPERATE;}
+	if (RH[turn-1]==DEFECT)
+	{	def[X]=(trahis[X]*(trahis[X]+1))/2 -1;
+		calm[X]=2;
+		return DEFECT;
+	}
+	else return COOPERATE;
+}
+
+
+
+
+
+
+/* strategies stichastiques proposees par Nowak et Sigmund */
+
+card sigmund(int X, int y, int p, int q)
+{
+	if (turn==1)
+		if ((rand()%100)<y) return COOPERATE; else return DEFECT;
+
+	if (RH[turn-1]==COOPERATE)
+		if ((rand()%100)<p) return COOPERATE; else return DEFECT;
+	else
+		if ((rand()%100)<q) return COOPERATE; else return DEFECT;
+}
+
+
+card s1(int X) {return sigmund(X,75,75,75);}
+card s2(int X) {return sigmund(X,75,75,25);}
+card s3(int X) {return sigmund(X,54,95,30);}
+
+
+
+
+
+/* famille de strategies qn telles que la qnieme strategie ajoutee
+gagne dans le paquet precedent */
+
+card q(int X, int N) {if (turn < N) return DEFECT; else return COOPERATE;}
+
+card q1(int X) {return q(X,1);}
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,19 @@
+IDP_CONFIGURATION_FILE
+Do_not_edit_it_by_hand
+R 3
+S 0
+T 5
+P 1
+N 2
+GAME_LENGHT 1000
+NB_GEN 0
+REPEAT 8
+SEED 0
+LOOS 0
+NOISE 0
+NbStrategies 4
+  100   all_c
+  100   all_d
+  100   ipd_random
+  100   tit_for_tat
+END_CONFIGURATION_FILE

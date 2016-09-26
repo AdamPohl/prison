@@ -1,0 +1,1173 @@
+                 /*********************************************/
+                 /*         Iterated Prisoner's Dilemma       */
+                 /*                                           */
+                 /*        Pour la Science, vol 181, Nov 92   */
+                 /*        Pour la Science, vol 187, Mai 93   */
+                 /*        IOS Press, Chaos and Society, 95   */
+                 /*                                           */
+                 /*        Authors: Philippe  MATHIEU         */
+                 /*                 Jean-paul DELAHAYE        */
+                 /*                                           */
+                 /*        Date  : 06/06/92                   */
+                 /*        maj   : 16/04/96                   */
+                 /*                                           */
+                 /*   e-mail : {mathieu, delahaye}@lifl.fr    */
+                 /*********************************************/
+
+
+
+/***************************************************************************
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Contact the authors for more details.
+*****************************************************************************/
+
+
+card strat1(int X)
+{static counter to;
+	if (turn==1) {to[X]=0; return COOPERATE;}
+	if (RH[turn-1]==DEFECT && MH[turn-1]==COOPERATE) to[X]++;
+	if (to[X]>nbC(RH)) return DEFECT;
+	return COOPERATE;
+}
+
+card strat2(int X)
+{       if (defect_lim(5,RH)==5) return RENOUNCE;
+	else return tit_for_tat(X);
+}
+
+
+card strat3(int X)
+{	return tit_for_tat(X);
+}
+
+card strat4(int X)
+{     	if (nbD(RH) >= nbC(RH) + 2) return RENOUNCE;
+		else return tit_for_tat(X);
+}
+
+card strat4_bis(int X)
+{
+	if ((nbD(RH) >= 1.25 * nbC(RH)) && (nbC(RH)>=8)) return RENOUNCE;
+	if ((nbD(RH) >= 4) && (nbC(RH)<8)) return RENOUNCE;
+	else return tit_for_tat(X);
+}
+
+card strat5(int X)
+{	if (turn==991) return DEFECT;
+	return tit_for_tat(X);
+}
+
+card strat6(int X)
+{	if (turn <= 4) return tit_for_tat(X);
+	else
+	{	if (score(MH)<2*(turn-1)) return RENOUNCE;
+		else return tit_for_tat(X);
+	}
+}
+
+
+card strat7(int X)
+{static counter cas;
+	if (turn==1) {cas[X]=0; return COOPERATE;}
+	if (turn==2) return DEFECT;
+	if (turn==3) return DEFECT;
+	if (turn==4)
+	{	if (nbD(RH)==3) return RENOUNCE;
+		if (nbD(RH)==0) {cas[X]=1; return DEFECT;}
+		return COOPERATE;
+	}
+	if (cas[X]==1) return DEFECT;
+	if (turn==5)
+		if ((nbD(RH)==1 && RH[3]==DEFECT) ||
+		    (nbC(RH)==1 && RH[3]==COOPERATE))
+		{	cas[X]=2; return DEFECT;} else return COOPERATE;
+	if (cas[X]==2) return DEFECT;
+	if (turn==6)
+		if (nbD(RH)==1 || nbC(RH)==1)
+		{cas[X]=3; return COOPERATE;} else return COOPERATE;
+	if (cas[X]==3 && MH[turn-1]==COOPERATE) return DEFECT;
+	if (cas[X]==3 && MH[turn-1]==DEFECT) return COOPERATE;
+	if (turn==7 && defect_lim(4,RH)==4)
+		return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+card strat8(int X)
+{double p,q,a,b;
+	if (turn==1) return COOPERATE;
+	else
+	{	p= (double)nbD(MH) / (double)(turn-1); q= (double)nbD(RH) / (double)(turn-1);
+		a= (3*q - 1)/(2-q); b=(2*q +1)/(3+q);
+		if (turn>100 && q>0.618) return RENOUNCE;
+		else
+			if (p<=a || p<q) return DEFECT;
+			else return COOPERATE;
+	}	
+}
+
+card strat9(int X)
+{static counter periode;
+	if (turn==1) {periode[X]=0; return COOPERATE;}
+	else
+	{	if (periode[X]==4) {periode[X]--; return DEFECT;}
+		if (periode[X]==3) {periode[X]--; return COOPERATE;}
+		if (periode[X]==2) {periode[X]--; return COOPERATE;}
+		if (periode[X]==1) {periode[X]--; return COOPERATE;}
+		if (RH[turn-1]==DEFECT) {periode[X]=4; return DEFECT;}
+		else return COOPERATE;
+	}
+}
+
+card strat10(int X)
+{
+	if (nbD(RH) > nbC(RH)) return RENOUNCE;
+	else return tit_for_tat(X);
+}
+
+card strat11(int X)
+{
+	if (rand()%3 == 0) return DEFECT;
+	else return COOPERATE;
+}
+
+card strat12(int X)
+{	if (nbD(RH) < 2) return tit_for_tat(X);
+	else  if (nbD(MH)<11) return DEFECT;
+	else  if (turn>10 && defect_lim(10,RH)<8) return DEFECT;
+	return RENOUNCE;
+}
+
+
+card strat13(int X)
+{	if (nbD(RH)>1) return RENOUNCE;
+	else return COOPERATE;
+}
+
+card strat14(int X)
+{	if (turn<=5) return tit_for_tat(X);
+	if (nbD(RH) <= (2*(turn-1)/3)) return tit_for_tat(X);
+	else return RENOUNCE;
+}
+
+
+card strat15(int X)
+{static counter cas;
+int nb_t;
+	if (turn <=6) {cas[X]=0; return tit_for_tat(X);}
+	nb_t=defect_lim(6,RH);
+	if (nb_t >= 5) return RENOUNCE;
+	if (cas[X]==0 && nb_t >= 4) {cas[X]=1; return DEFECT;}
+	if (cas[X]==1 && nb_t < 3) {cas[X]=0; return tit_for_tat(X);}
+	if (cas[X]==1) return DEFECT;
+	return tit_for_tat(X);
+}
+
+int dephasage(int phase)
+{int i; int echec=0;
+	for (i=5; i<=20-phase && echec==0; i++)
+		if (RH[i]!=RH[i+phase]) echec=1;
+	return 1-echec;
+}
+
+int cherche_phase()
+{int i;
+	for (i=2; i<=5; i++)
+		if (dephasage(i)) return i;
+	return 0;
+}
+
+
+card strat16(int X)
+{static counter phase;
+	if (turn <=20) return tit_for_tat(X);
+	if (turn==21)
+	{	phase[X]=cherche_phase();
+		if (nbD(RH)==0) phase[X]=0;
+	}
+	if (phase[X] && RH[turn-1]==DEFECT && MH[turn-1]==COOPERATE)
+		phase[X]=0;
+	if (phase[X]) return RH[turn - phase[X]];
+	return tit_for_tat(X);
+}
+
+card strat17(int X)
+{	if (turn<=2) return tit_for_tat(X);
+	else
+		if (RH[turn-2]==COOPERATE &&
+		    RH[turn-1]==DEFECT &&
+		    MH[turn-2]==DEFECT)
+			return COOPERATE;
+		else return tit_for_tat(X);
+}
+
+
+card strat18(int X)
+{static counter cas;
+	if (turn<=2) { cas[X]=0; return tit_for_tat(X);}
+	if (defect_lim(5,RH)==5) return RENOUNCE;
+	if (defect_lim(2,RH)==2)	cas[X]=1;
+	if (cas[X]==1) return DEFECT;
+	return tit_for_tat(X);
+}
+
+card strat19(int X)
+{       if (turn==1) return COOPERATE;
+	else
+		if (RH[turn-1]==COOPERATE) return COOPERATE;
+	        else
+			if (rand()%5) return RENOUNCE;
+			else return DEFECT;
+}
+
+card strat20(int X)
+{	if (turn==1) return COOPERATE;
+	if (turn%20==0) return DEFECT;
+	if (nbC(RH)>nbD(RH))  return COOPERATE;
+	if (nbD(RH)>nbC(RH))  return RENOUNCE;
+	else /*if (nbD(RH)==nbC(RH))*/  return DEFECT;
+}
+
+card strat21(int X)
+{	if (turn==1) return COOPERATE;
+	if (turn<=100)
+	{	if (defect_lim(3,RH)==3) return RENOUNCE;
+		else return tit_for_tat(X);
+	}
+	if (defect_lim(2,RH)==2) return RENOUNCE;
+	if (turn % (1001-turn))	return tit_for_tat(X);
+	else return DEFECT;
+}
+
+card strat22(int X)
+{	if (turn==1) return COOPERATE;
+	if (defect_lim(4,RH)==4) return RENOUNCE;
+	if (turn > 2)
+	{
+	if (RH[turn-2]==DEFECT && RH[turn-1]==DEFECT &&
+	    MH[turn-2]==COOPERATE && MH[turn-1]==COOPERATE)
+		return COOPERATE;
+	if (RH[turn-2]==DEFECT && RH[turn-1]==COOPERATE &&
+	    MH[turn-2]==COOPERATE && MH[turn-1]==DEFECT)
+		return COOPERATE;
+	if (RH[turn-2]==COOPERATE && RH[turn-1]==DEFECT &&
+	    MH[turn-2]==DEFECT && MH[turn-1]==COOPERATE)
+		return COOPERATE;
+	if (RH[turn-2]==COOPERATE && RH[turn-1]==COOPERATE &&
+	    MH[turn-2]==DEFECT && MH[turn-1]==DEFECT)
+		return COOPERATE;
+	if (RH[turn-2]==DEFECT && RH[turn-1]==DEFECT &&
+	    MH[turn-2]==DEFECT && MH[turn-1]==DEFECT)
+		return COOPERATE;
+	}
+	return tit_for_tat(X);
+}
+
+card strat23(int X)
+{	return tit_for_tat(X);
+}
+
+card strat24(int X)
+{static counter cas;
+	if (turn==1) {cas[X]=0; return COOPERATE;}
+	if (cas[X]==0 && defect_lim(3,RH)==3) {cas[X]=1; return COOPERATE;}
+	if (cas[X]==0 || cas[X]==1) return tit_for_tat(X);
+	printf("cas non prevu : strat24\n");
+}
+
+card strat25(int X)
+{	if (turn>20 && score_lim(20,MH)<38) return RENOUNCE;
+	else return tit_for_tat(X);
+}
+
+
+card strat26(int X)
+{	if (turn<=3) return COOPERATE;
+	if (defect_lim(3,RH)==3) return RENOUNCE;
+	else return tit_for_tat(X);
+}
+
+
+card strat27(int X)
+{	if (defect_lim(3,RH)==3) return RENOUNCE;
+	else return tit_for_tat(X);
+}
+
+
+card strat28(int X)
+{static counter cpt;
+	if (turn==1) {cpt[X]=0; return COOPERATE;}
+	if (defect_lim(2,RH)==2) return RENOUNCE;
+	if (turn>7)
+	{
+		if (    cpt[X]<2 &&
+			MH[turn-7]==COOPERATE && RH[turn-7]==DEFECT &&
+			MH[turn-6]==DEFECT && RH[turn-6]==COOPERATE &&
+			MH[turn-5]==COOPERATE && RH[turn-5]==DEFECT &&
+			MH[turn-4]==DEFECT && RH[turn-4]==COOPERATE &&
+			MH[turn-3]==COOPERATE && RH[turn-3]==DEFECT &&
+			MH[turn-2]==DEFECT && RH[turn-2]==COOPERATE &&
+			MH[turn-1]==COOPERATE && RH[turn-1]==DEFECT)
+			return COOPERATE;
+	}
+	return tit_for_tat(X);
+}
+
+
+card strat29(int X)
+{	return DEFECT;
+}
+
+card strat30(int X)
+{	if (turn<15) return graduel(X); /* called when turn==1 OK */
+	else
+		if (score(MH)<2*(turn-1)) return RENOUNCE;
+		else return graduel(X);  /* ok */
+}
+
+card strat31(int X)
+{	if (turn==1) return COOPERATE;
+	if (nbD(RH)>nbC(RH) && nbD(RH)>=3)
+		return RENOUNCE;
+	if (RH[turn-1]==COOPERATE && MH[turn-1]==COOPERATE)
+		return COOPERATE;
+	else  return DEFECT;
+}
+
+
+card strat32(int X)
+{	if (nbD(RH)==3 || defect_lim(2,RH)==2)
+		return RENOUNCE;
+	else return tit_for_tat(X);
+}
+
+card strat33(int X)
+{	if (turn<=9) return tit_for_tat(X);
+	if (3*nbD(RH) >= turn-1) return RENOUNCE;
+	else return tit_for_tat(X);
+}
+
+card strat34(int X)
+{static counter cas;
+	if (turn==1) {cas[X]=0; return COOPERATE;}
+	if (defect_lim(5,RH)==5) return RENOUNCE;
+	if (turn<50) return tit_for_tat(X);
+	if (turn==50 || turn==51) return DEFECT;
+	if (RH[51]==COOPERATE) return DEFECT;
+	if (turn==52 || turn==53) return COOPERATE;
+	return tit_for_tat(X);
+}
+
+
+card strat35(int X)
+{	if (nbD(RH)>=2) return RENOUNCE;
+	return COOPERATE;	
+}
+
+card strat36(int X)
+{
+   static const int Etat_Suivant[4][2] = {{1,0},{3,2},{3,0},{4,1}};
+   static const card Reaction[4][2] = {{DEFECT,COOPERATE},{DEFECT,COOPERATE},
+                                                                 {COOPERATE,COOPERATE},{RENOUNCE,COOPERATE}};
+   static counter Etat;
+   int Reponse;
+
+   if (turn == 1)
+   {
+          Etat[X] = 0;
+          return(COOPERATE);
+   }
+   switch (RH[turn - 1])
+   {
+          case DEFECT:   Reponse = Reaction[Etat[X]][0];
+                                         Etat[X] = Etat_Suivant[Etat[X]][0];
+                                         break;
+          case COOPERATE: Reponse = Reaction[Etat[X]][1];
+					 Etat[X] = Etat_Suivant[Etat[X]][1];
+                                         break;
+   }
+   return(Reponse);
+}
+
+card strat37(int X)
+{ /* graduel mais RENOUNCE si l'autre a trahi plus */
+  /* de la moitii du temps. */
+
+  static counter nbt,en_cours ;
+
+  if (turn == 1)
+    { nbt[X] = en_cours[X] = 0 ;
+      return COOPERATE ;
+    }
+  else
+    { if (en_cours[X] == 1 || en_cours[X] == 2)
+	{ en_cours[X]-- ;
+	  return COOPERATE ;
+	}
+      else if (en_cours[X] > 2)
+	     { en_cours[X]-- ;
+	       return DEFECT ;
+	     }
+	   else if (RH[turn - 1] == DEFECT)
+		  { nbt[X]++ ;
+		    if (nbt[X] > turn / 2)
+		      return RENOUNCE ;
+		    else
+		      { en_cours[X] = nbt[X] + 2 - 1;
+			return DEFECT ;
+		      }
+		  }
+		else return COOPERATE ;
+    }
+}
+
+
+card strat38(int X)
+{	if (defect_lim(2,RH)==2) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+
+card strat39(int X)
+{	
+}
+
+card strat40(int X)
+{	if (defect_lim(2,RH)==2) return RENOUNCE;
+	return COOPERATE;	
+}
+
+
+
+card strat41(int X)
+{	if (nbD(RH)>=36 && score(MH)< 2*(turn -1)) return RENOUNCE;
+	if (nbD(RH)>0)
+		if (rand()%6) return DEFECT;
+		else return COOPERATE;
+	return tit_for_tat(X);
+}
+
+card strat42(int X)
+{	if (defect_lim(2,RH)>=2) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+card strat43(int X)
+{static counter cas;
+	if (turn==1) {cas[X]=0; return COOPERATE;}
+	if (turn<=3) return tit_for_tat(X);
+	if (turn==4) cas[X]=nbD(RH);	
+	if (cas[X]==3) return RENOUNCE;
+	if (cas[X]==0) return COOPERATE;
+	return DEFECT;
+}
+
+
+card strat44(int X)
+{	if (RH[turn-1]==DEFECT) return RENOUNCE;
+	return COOPERATE;
+}
+
+
+card strat45(int X)
+{static counter nb_trahis,en_cours,degre;
+	if (turn==1) {nb_trahis[X]=0;en_cours[X]=0;degre[X]=0;return COOPERATE;}
+	else if ((turn % 20) ==0 && (score(MH)*10)<((turn-1)*15))
+			return RENOUNCE;
+	else
+	{	if (en_cours[X] == 1 || en_cours[X] == 2)
+		{en_cours[X]--;return COOPERATE;}
+		else if (en_cours[X] >2)
+			{en_cours[X]--;return DEFECT;}
+		     else if (RH[turn -1]==DEFECT)
+			{nb_trahis[X]++;degre[X]+=nb_trahis[X];
+			 en_cours[X]=degre[X]+2-1;
+			 return DEFECT; }
+		     else return COOPERATE;
+	}
+}
+
+
+card strat46(int X)
+{	if (defect_lim(2,RH)>=2) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+
+card strat47(int X)
+{	if (defect_lim(3,RH)==3 && defect_lim(3,MH)==3) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+card strat48(int X)
+{
+	if (defect_lim(2,RH)==2) return RENOUNCE;
+	if (turn>=3 && RH[turn-3]==DEFECT && RH[turn-2]==COOPERATE && RH[turn-1]==DEFECT)
+		return COOPERATE;
+	if (rand()%100==0) return DEFECT; else return tit_for_tat(X);
+}
+
+
+card strat49(int X)
+{static counter cas;
+	if (turn==1) {cas[X]=0; return COOPERATE;}
+	if (turn<=5) return tit_for_tat(X);
+	if (turn==6) cas[X]=nbD(RH);	
+	if (cas[X]==0) return DEFECT;
+	if (cas[X]==1 || cas[X]==2) return COOPERATE;
+	return tit_for_tat(X);
+}
+
+card strat50(int X)
+{int nbt;
+	if (turn==1) return DEFECT;
+	if (turn>3) nbt=defect_lim(3,RH);
+	if (nbt==0) return DEFECT;
+	if (nbt==3) return RENOUNCE;
+	if (RH[turn-1]==COOPERATE && MH[turn-1]==COOPERATE) return COOPERATE;
+	if (RH[turn-1]==DEFECT && MH[turn-1]==DEFECT) return COOPERATE;
+	return DEFECT;
+}
+
+card strat51(int X)
+{	
+	if ((turn-1)%4==0 && turn>=4 && score_lim(4,MH)<8) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+
+card strat52(int X)
+{	if (defect_lim(2,RH)==2) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+
+card strat53(int X)
+{	if (defect_lim(2,RH)==2) return RENOUNCE;
+	return COOPERATE;	
+}
+
+card strat54(int X)
+{static counter cas;
+	if (turn==1) {cas[X]=0; return COOPERATE;}	
+	if (defect_lim(4,RH)==4) return RENOUNCE;
+	if (turn>3 && defect_lim(3,RH)==0) cas[X]=1;
+	if (cas[X]==1 && RH[turn-1]==DEFECT) cas[X]=2;
+	if (cas[X]==2 && RH[turn-1]==COOPERATE) cas[X]=0;
+	if (cas[X]==2) return COOPERATE;
+	if (cas[X]==1) return DEFECT;
+	if (cas[X]==0) return tit_for_tat(X);
+	printf("cas non prevu : strat54\n");
+}
+
+
+card strat55(int X)
+{	if (defect_lim(3,RH)==3) return RENOUNCE;
+	return tit_for_tat(X);
+}
+	
+card strat56(int X)
+{
+}
+
+
+card strat57(int X)
+{	if (defect_lim(2,RH)==2) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+
+card strat58(int X)
+{int a,b,c,rep;
+	if (turn<=3) return tit_for_tat(X);
+	if (defect_lim(5,RH)==5) return RENOUNCE;
+	if (turn>=10 && defect_lim(10,RH)>=7) return RENOUNCE;
+	if (RH[turn-3]==COOPERATE)
+		if (MH[turn-3]==COOPERATE) a=3; else a=5;
+	else if (RH[turn-3]==DEFECT)
+		if (MH[turn-3]==COOPERATE) a=0; else a=1;
+	if (RH[turn-2]==COOPERATE)
+		if (MH[turn-2]==COOPERATE) b=3; else b=5;
+	else if (RH[turn-2]==DEFECT)
+		if (MH[turn-2]==COOPERATE) b=0; else b=1;
+	if (RH[turn-1]==COOPERATE)
+		if (MH[turn-1]==COOPERATE) c=3; else c=5;
+	else if (RH[turn-1]==DEFECT)
+		if (MH[turn-1]==COOPERATE) c=0; else c=1;
+	rep=a*100+b*10+c;
+	switch (rep)
+	{	case 003:
+		case 033:
+		case 050:
+		case 053:
+		case 133:
+		case 305:
+		case 313:
+		case 331:
+		case 335:
+		case 350:
+		case 353:
+		case 500:
+		case 503:
+		case 533: return COOPERATE;
+		case 333: {if ((score(MH) >= 2.95*(turn-1)) && (score(RH) >= 2.57*(turn-1)) && (rand()%2==1)) {return DEFECT;}
+			  else return COOPERATE;
+			  }
+		default : return DEFECT;
+	}
+}
+
+card strat59(int X)
+{long sa, sm;
+	if (turn==1) return COOPERATE;
+	if (turn<7) return tit_for_tat(X);
+	sa=score_lim(7,RH);
+	sm=score_lim(7,MH);
+	if (sm<13 || (sa>14 && sa>sm)) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+
+card strat60(int X)
+{	
+if (turn==1) return COOPERATE;
+if ( turn>50 && score(MH)<(turn-1)*2 )
+	return RENOUNCE;
+else
+	if ( (turn>2) && (RH[turn-2]==DEFECT) )
+		if ( rand()%20 == 1)	return COOPERATE;
+		else return DEFECT;
+	else	return COOPERATE;
+}
+
+
+card strat61(int X)
+{	if (turn<5) return tit_for_tat(X);
+	if (score_lim(4,MH)<8) return RENOUNCE;
+	else return tit_for_tat(X);
+}
+
+
+card strat62(int X)
+{static counter a1,a2,a3,a4,a5,a6,cas;
+	if (turn<=3) return COOPERATE;
+	if ((turn-4)%30==0) {a1[X]=3; a2[X]=5; a3[X]=7; a4[X]=5; a5[X]=3; a6[X]=7; cas[X]=1;}
+	if (cas[X]==1) if (a1[X]>0) {a1[X]--; return COOPERATE;} else cas[X]=2;
+	if (cas[X]==2) if (a2[X]>0) {a2[X]--; return DEFECT;} else cas[X]=3;
+	if (cas[X]==3) if (a3[X]>0) {a3[X]--; return COOPERATE;} else cas[X]=4;
+	if (cas[X]==4) if (a4[X]>0) {a4[X]--; return DEFECT;} else cas[X]=5;
+	if (cas[X]==5) if (a5[X]>0) {a5[X]--; return COOPERATE;} else cas[X]=6;
+	if (cas[X]==6) if (a6[X]>0) {a6[X]--; return DEFECT;}
+	printf("cas non prevu: strat 62 \n");
+}
+
+card strat63(int X)
+{	if (turn==1) return COOPERATE;
+	if (RH[turn-1]==COOPERATE) return COOPERATE;
+	return RENOUNCE;
+}
+
+
+card strat64(int X)
+{static counter cas;
+int nbt;
+	if (turn==1) {cas[X]=0; return COOPERATE;}
+	if (turn==2) return COOPERATE;
+	if (turn==3) return DEFECT;
+	if (turn==4) return DEFECT;
+	if (turn==5) return DEFECT;
+	if (turn==6) return DEFECT;
+	if (cas[X]==1) return DEFECT;
+	if (cas[X]==2) return tit_for_tat(X);
+	if (turn==7)
+	{	nbt=defect_lim(6,RH);
+		if (nbt==0) {cas[X]=1; return DEFECT;}
+		if (nbt==6 || (nbt==5 && RH[1]==COOPERATE)) return RENOUNCE;
+		else {cas[X]=2; return tit_for_tat(X);}
+	}
+	printf("cas non prevu: strat 64 \n");
+}
+
+card strat65(int X)
+{
+}
+
+
+card strat66(int X)
+{	if (turn<=10) return tit_for_tat(X);
+	if (score(MH) < 2*(turn-1)) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+
+card strat67(int X)
+{	if (turn<=6) return DEFECT;
+	if (RH[1]==COOPERATE && RH[2]==COOPERATE && RH[3]==DEFECT)
+		return COOPERATE;
+	return DEFECT;
+}
+
+
+card strat68(int X)
+{	if (turn<=4) return DEFECT;
+	if (RH[turn-1]==COOPERATE) return DEFECT;
+	else return COOPERATE;
+}
+
+
+card strat69(int X)
+{	if (turn==1) return DEFECT;
+	if (nbD(RH)==5) return RENOUNCE;
+	return tit_for_tat(X);	
+}
+
+
+
+card strat70(int X)
+{	if (turn==1) return DEFECT;
+	if (defect_lim(3,RH)==3) return RENOUNCE;
+	return tit_for_tat(X);	
+}
+
+card strat71(int x)
+{
+}
+
+
+card strat72(int X)
+{	if (turn<=5) return DEFECT;
+	return COOPERATE;
+}
+
+
+card strat73(int X)
+{	if (turn<=2) return DEFECT;
+	return tit_for_tat(X);
+}
+
+card strat74(int X)
+{static counter cas;
+	if (turn==1) {cas[X]=0; return COOPERATE;}
+	if (turn<=4) return COOPERATE;
+	if (turn==5 && nbD(RH)==4) cas[X]=1; else cas[X]=2;
+	if (cas[X]==1)
+	{	if (defect_lim(7,RH)==7) return RENOUNCE;
+		return DEFECT;
+	}
+	if (cas[X]==2)
+	{	if (defect_lim(3,RH)==3) return RENOUNCE;
+		return tit_for_tat(X);
+	}
+	printf("cas non prevu: strat 74 \n");
+}
+
+card strat75(int X)
+{	if (turn<=10) return DEFECT;
+	return COOPERATE;
+}
+
+
+card strat76(int X)
+{	return DEFECT;
+}
+
+card strat77(int X)
+{	if (turn<=5) return DEFECT;
+	return COOPERATE;
+}
+
+card strat78(int X)
+{	if (score(MH)+500 < score(RH)) return RENOUNCE;
+	if (turn%20==0) return DEFECT;
+	return tit_for_tat(X);
+}
+
+card strat79(int X)
+{	if (turn<=10) return DEFECT;
+	return COOPERATE;
+}
+
+card strat80(int X)
+{static counter cas,cpt;
+	if (turn==1) {cas[X]=1; return COOPERATE;}
+	if (cas[X]==1)
+		if (RH[turn-1]==COOPERATE) return COOPERATE;
+		else {cas[X]=2; return DEFECT;}
+	if (cas[X]==2)
+		if (RH[turn-1]==COOPERATE) {cas[X]=1; return COOPERATE;}
+		else {cas[X]=3; cpt[X]=-1; return DEFECT;}
+	if (cas[X]==3)
+	{
+		if (RH[turn-1]==DEFECT) cpt[X]++;
+		if (cpt[X]<12) return DEFECT;
+		if (nbD(RH)>nbC(RH)) return RENOUNCE;
+		else {cas[X]=2; return COOPERATE;}
+	}	
+	printf("cas non prevu : strategie 80 \n");
+}
+
+
+card strat81(int X)
+{	if (turn==1) return COOPERATE;
+	if (turn==2) return DEFECT;
+	return COOPERATE;
+}
+
+card strat82(int X)
+{	if (turn==1) return COOPERATE;
+	if (RH[1]==COOPERATE) return DEFECT;
+	else return COOPERATE;
+}
+
+card strat83(int X)
+{static counter cpt;
+	if (turn <=5) return DEFECT;
+	if (turn==6)
+		if (nbD(RH)>=3) return RENOUNCE;
+		else cpt[X]=9;
+	if (cpt[X]==0) {cpt[X]=9; return DEFECT;}
+	else {cpt[X]--; return COOPERATE;}
+}
+
+
+card strat84(int X)
+{	if ((turn-1)%20 < 4) return DEFECT;
+	else return COOPERATE;
+}
+
+card strat85(int X)
+{	if (turn<=2) return DEFECT;
+	return tit_for_tat(X);
+}	
+	
+card strat86(int X)
+{	if (turn==1) return DEFECT;
+	if (nbD(RH)==2) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+card strat87(int X)
+{	if (turn==1) return DEFECT;
+	if (defect_lim(5,RH)==5) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+card strat88(int X)
+{	if (turn<=2) return tit_for_tat(X);
+	if (score(MH)<2*(turn-1)) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+
+card strat89(int X)
+{	if (defect_lim(2,RH)==2) return RENOUNCE;
+	return COOPERATE;
+}
+
+card strat90(int X)
+{	
+}
+
+card strat91(int X)
+{	if (turn<=10) return COOPERATE;
+	if (turn==11 && nbC(RH)<4) return RENOUNCE;
+	return COOPERATE;
+}
+
+card  strat92(int X)
+{       if (turn<=5) return DEFECT;
+	if (RH[5]==COOPERATE) return COOPERATE;
+	else return DEFECT;
+}	
+
+card strat93(int X)
+{	if (turn==1) return COOPERATE;
+	if (score(MH)<(2.25*(turn-1) - 0.75)) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+
+card strat94(int X)
+{	if (turn==1) return  COOPERATE;
+	if (turn>=50)
+		if (score(MH)< 2*(turn-1)) return RENOUNCE;
+		else return tit_for_tat(X);	
+	if (turn%10==1)
+		if (score(MH) < (1.5+(turn/100))*(turn-1)) return RENOUNCE;
+		else return tit_for_tat(X);
+	return tit_for_tat(X);
+}
+
+card strat95(X)
+{
+}
+
+
+card strat96(int X)
+{	if (turn<=2) return DEFECT;
+	if (defect_lim(10,RH)==10) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+card strat97(int X)
+{static counter cas;
+	if (turn==1) return COOPERATE;
+	if (turn==2) return COOPERATE;
+	if (turn==3) return DEFECT;
+	if (turn==4) return DEFECT;
+	if (turn==5) return COOPERATE;
+	if (turn==6) return DEFECT;
+	if (turn==7)
+		if (nbD(RH)==0) cas[X]=1; else cas[X]=2;
+	if (cas[X]==1) return tit_for_tat(X);
+	if (cas[X]==2) return DEFECT;
+	printf("cas non prevu: strat 97\n");
+}
+
+
+card strat98(int X)
+{	return COOPERATE;
+}
+
+
+
+card strat99(int X)
+{	if (defect_lim(2,RH)==2) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+card strat100(int X)
+{	if (defect_lim(10,RH)==10) return RENOUNCE;
+	if (turn<=30 && score(MH)<(2*(turn-1)-(turn/10))) return RENOUNCE;
+	if (turn>30 && score(MH)<(2*(turn-1))) return RENOUNCE;
+	return tit_for_tat(X);
+}
+
+card strat101(int X)
+{static counter cum1,cum2,cum3,cum4,cas;
+	if (turn<=5) return tit_for_tat(X);
+	if (turn==6) cum1[X]=score_lim(4,MH);
+	if (turn<=10) return gentille(X);
+	if (turn==11) cum2[X]=score_lim(4,MH);
+	if (turn<=15) return rancuniere(X);
+	if (turn==16) cum3[X]=score_lim(4,MH);
+	if (turn<=20) return per_gentille(X);
+	if (turn==21)
+	{	cum4[X]=score_lim(4,MH);
+		cum1[X]*=3; cum2[X]*=3; cum3[X]*=3; cum4[X]*=3;
+	}
+	
+	if (turn>21 && (turn-21)%12==0)
+	{	if (cas[X]==1) cum1[X]=score_lim(12,MH);
+		if (cas[X]==2) cum2[X]=score_lim(12,MH);
+		if (cas[X]==3) cum3[X]=score_lim(12,MH);
+		if (cas[X]==4) cum4[X]=score_lim(12,MH);
+	}
+	if ((turn-21)%12==0)
+	{
+		if (cum4[X]<24 && cum3[X]<24 && cum2[X]<24 && cum1[X]<24) return RENOUNCE; 
+
+		if (cum1[X]>=cum4[X] && cum1[X]>=cum3[X] && cum1[X]>=cum2[X]) cas[X]=1;
+		else if (cum2[X]>=cum4[X] && cum2[X]>=cum3[X] && cum2[X]>=cum1[X]) cas[X]=2;
+		else if (cum3[X]>=cum4[X] && cum3[X]>=cum2[X] && cum3[X]>=cum1[X]) cas[X]=3;
+		else if (cum4[X]>=cum3[X] && cum4[X]>=cum2[X] && cum4[X]>=cum1[X]) cas[X]=4;
+	}
+	if (cas[X]==1) return tit_for_tat(X);
+	if (cas[X]==2) return gentille(X);
+	if (cas[X]==3) return rancuniere(X);
+	if (cas[X]==4) return per_gentille(X);
+	printf("cas non prevu: strat 101 \n");
+}
+
+
+card strat102(int X)
+{ static counter mrq;
+   if (turn==1) { mrq[X]=0; return COOPERATE;} 
+   if (turn<5) return tit_for_tat(X);
+   if ((turn-1) % 4 == 0) 
+   { 
+         if ((score(MH)-mrq[X]) < 8) return RENOUNCE;
+         else
+         {   mrq[X]=score(MH); return tit_for_tat(X);}
+   }
+   else return tit_for_tat(X);
+}
+
+
+card strat103(int X)
+{     static counter ii,ite ;
+      int icc,i,j ,ict,kb,per1,per2,ico,imaj;
+               if (turn == 1) return DEFECT;
+        else   if (turn == 2) return COOPERATE;
+	else   if (turn == 3) return COOPERATE;
+	else   if (turn == 4) return DEFECT;
+	else   if (turn-1 == 10)ii[X]=score(MH);
+	else   if (turn-1 != 20) goto suit;
+	else   ite[X]=20;
+suit:
+   { for (j = 3 ; j <= turn - 1 ; j++)
+         if (RH[j-1] != RH[j]) goto sond ;
+   }
+    {  if (RH[2] == DEFECT && turn - 1 < 7 )return DEFECT;
+       else if ( RH[2] == DEFECT )return RENOUNCE;
+       else return COOPERATE; 
+    }
+  sond:
+ { if (RH[1] != DEFECT )goto maj;
+   if (RH[2] != COOPERATE )goto maj;
+   if (RH[3] != COOPERATE )goto maj;
+   { for( i=4 ; i<=turn - 1 ;i++)
+     if (RH[i] != DEFECT )goto maj;
+   }
+     if (turn - 1 < 6 )return DEFECT;
+     else return RENOUNCE;
+ }
+ maj:
+ {  if (RH[1] == DEFECT) kb=1;
+    else kb=2;
+   for (i = 1 ;i<=turn - 2 ;i++ )
+   { if (MH[i] == DEFECT)ict++;
+      else icc++;
+      if(ict < icc)imaj=1;
+      if(ict == icc)imaj = kb;
+      if(ict > icc)imaj =2;
+      if(RH[i+1] != imaj)goto per;
+   }
+   if(kb == 2 && ict >= icc)return COOPERATE;
+   if(kb == 2 && ict < icc)return DEFECT;
+   if(icc > ict+1)return DEFECT;
+   else return COOPERATE;
+ }
+ per:
+ { per1 = 1;
+   j = 2;
+   { while (RH[j-1] == RH[j])
+      {per1++;
+       i++;
+       j++;
+      }
+    }
+      if(per1 + 1 == turn-1)goto tecou;
+      for (j = per1+1;j<=turn-1 ;j++)
+	{i=j-1;
+	 if(RH[i]!=RH[j])goto rup;
+	 else {per2++;
+	       i++;
+	       j++;
+              }
+        }
+	goto tecou;
+  }
+  rup:
+  {     ico=0;
+     bou1:
+       for(j=1;j<=per1;j++)
+	{if(ico == turn-1)goto cal;
+	 else ico++;
+          if(RH[1] != RH[ico])goto tecou;
+        }
+	for (j=1 ;j<=per2 ;j++)
+	{if(ico == turn-1)goto cal;
+	 else ico++;
+	 if(RH[per1+1] != RH[ico])goto tecou;
+        }
+	goto bou1;
+  }
+  cal:
+  {    if(RH[1] == DEFECT)goto cal1;
+      else goto cal2;
+  cal1:
+      if(per1 + 5*per2 > 2 * (per1 + per2))return DEFECT;
+      else {if(turn > 12)return RENOUNCE;
+	    else return DEFECT;
+	   }
+  cal2:
+      if((5 * per1 +per2 ) > 2 * (per1 + per2))return DEFECT;
+       else { if (turn > 12)return RENOUNCE;
+              else return DEFECT;
+	    }
+   }
+ tecou:
+     if(turn-1 < ite[X])return COOPERATE;
+     if(turn-1 == ite[X])goto cil;
+     else return COOPERATE;
+  cil:
+  {   if(score(MH)-ii[X] < 20)return RENOUNCE;
+     else {ii[X]=score(MH);
+	   ite[X]=ite[X]+10;
+	  }
+  }
+  printf("cas non prevu: strat 103 \n");
+}
+
+
+
+card strat104(int X)
+{
+ static counter testa,testb;
+ int i,test;
+ if (turn==1)
+  {   testa[X]=0;   testb[X]=0;   return COOPERATE;  }
+ if(turn==2) return DEFECT;
+ if(turn==3) return COOPERATE;
+ if((turn>3) && (testa[X]==0))
+   {
+    testa[X]=2;
+    if((RH[1]==COOPERATE)&&(RH[2]==COOPERATE)
+    &&(RH[3]==COOPERATE)) testa[X]=3;
+    if((RH[1]==DEFECT)&&(RH[2]==DEFECT)
+    &&(RH[3]==DEFECT)) testa[X]=1;
+   }
+  if((testa[X]==1)||(testa[X]==3)) return DEFECT;
+  if (testa[X]==2)  /* prise en compte des tft durs */
+   {
+    if ((RH[turn-1]==DEFECT)&&(RH[turn-2]==DEFECT)
+                      &&(RH[turn-3]==DEFECT)) return DEFECT;
+     else return COOPERATE;
+   }
+  if((turn>10)&&(testa[X]==1))
+   {
+    test=0;
+    for(i=1;i<=10;i++)
+     {
+      if (RH[turn-i]==COOPERATE) test=1;
+     }
+    if (test==0) return RENOUNCE;  /* refus face  la mauvaise volont */
+   }
+  if ((turn>6)&&(testa[X]==3))
+   {
+    if(RH[turn-1]==DEFECT) /* raction face  ma trahison */
+     {      testb[X]=1;    return COOPERATE;     }
+   }
+  if ((testa[X]==3)&&(testb[X]==1))
+   {
+    if((turn<10)&&(testb[X]==1)) return COOPERATE;
+    if(turn>=10)
+     
+      if(RH[turn-1]==DEFECT) testa[X]=1;
+      return COOPERATE;
+                                           /*  prise en compte des borns */
+
+   }
+   if((turn>10)&&(testa[X]==2))
+                                /* frontire pour viter les majoritaires */
+   {
+    if(RH[turn-1]==DEFECT) testa[X]=1;
+                                       /* prise en compte des cycliques */
+   }
+   printf("cas non prevu: strat 104 \n");
+
+}
+
+
+/************************************************************/
+
+
+card nouvelle(int X)
+{	if (turn < 7) return COOPERATE;
+	if (score(MH)<2*(turn-1)) return RENOUNCE;
+	if (score_lim(1,MH) < score_lim(1,RH)) return RH[turn-1];
+	else return MH[turn -1];
+}
+

@@ -1,0 +1,149 @@
+                 /*********************************************/
+                 /*         Iterated Prisoner's Dilemma       */
+                 /*                                           */
+                 /*        Pour la Science, vol 181, Nov 92   */
+                 /*        Pour la Science, vol 187, Mai 93   */
+                 /*        IOS Press, Chaos and Society, 95   */
+                 /*                                           */
+                 /*        Authors: Philippe  MATHIEU         */
+                 /*                 Jean-paul DELAHAYE        */
+                 /*                                           */
+                 /*        Date  : 06/06/92                   */
+                 /*        maj   : 04/04/97                   */
+                 /*                                           */
+                 /*   e-mail : {mathieu, delahaye}@lifl.fr    */
+                 /*********************************************/
+
+
+
+/***************************************************************************
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Contact the authors for more details.
+*****************************************************************************/
+
+
+LAST CHANGES
+
+
+Actual version : 05/05/97
+
+
+Version 24/04/96
+----------------
+
+. It is now possible to compute subclasses of any size.
+
+. The result of the subclasses computation is sorted on the
+number of victories of each strategy.
+
+. Exaeco are counted.
+
+. An analysis of roundrobin tournaments have been added.
+When you ask for tournaments you obtain also
+the result of this analysis that is , for each strategy
+the best gap, worst gap, best score, worst score it obtained.
+
+. When you ask for Tournaments you obtain directly
+the analysis and the score without any question
+
+. When tou ask for Generations you obtain directy
+the evolution result witout any question.
+It is not possible at this level to obtain the round-robin result
+except if you asked for the trace before.
+
+
+version 19/11/96
+----------------
+. The program tinypri.c has been added to the package.
+  It contains a simpler version than prison.c without subclasses, domination
+  but more easy to understand.
+  It is in fact a good program to study with students.
+
+. In this soft, no question is asked to the user, it is always an ecological evolution.
+  All the results are stored in files with prefix 'result' 
+
+. In tinypri.c we have added the percentage cooperation at the end
+  of the result.dat file (last column).
+  With gnuplot, you can then obtain the percentation cooperation curve during
+  the evolution.
+
+
+
+version 12/12/96
+----------------
+
+There was an error when you use two same strategies in the panel.
+For example   prison -a 3,3
+
+The error was only in the .cmd file which is used by Gnuplot.  In fact
+the program was always using the same column of data for the two same
+strategies (thus the same curve), with can be not correct.
+
+This error has been corrected in prison.c and tinypris.c
+
+You can test it with, for example : tinypri -R1 -S0 -a 3,3
+In this case you must have a winner and a looser (not the same curve)
+
+
+
+version 23/01/97
+----------------
+
+There was an error in tinypri.c during the cooperation cuve
+computation.  In some cases it was able to obtain a negative
+percentage of cooperation !.
+
+This error comes from a cast in integer which was not correct in the
+function compute_coop.
+
+This error is now corrected.
+
+
+
+version 10/03/97
+----------------
+
+There was an error in recop_str in tinypri.c and prison.c
+The index test on dest was wrong.
+It was : 
+	if (source>0 && source<=max && dest<=max)
+and it must be 
+	if (source>0 && source<=max && dest<=NB_STRAT_MAX)
+
+
+The problem appeared only when you asked for the same strategies many
+times with a number of strategies more than NB_STRAT_MAX.
+
+
+
+version 04/04/97
+----------------
+
+The names of the files of the package have been changed to 8+3
+characters to run without any problem under DOS, W3.1 and W95.
+
+For instance, all strategies files are now called *.str and the master
+definition file is called strategy.h
+
+
+str_12_base and str_21_suiv have been merged into classics.str.
+
+
+version 05/05/97
+----------------
+
+strategy.h and classics.str have been changed.
+
+We have tried to translate correctly all the strategy names and
+associated comments.
+
+The file translate.names contains a translation table between English
+names and French names.
+
+
+There was a bug in the best_of computation. The rank information was
+false. So it has been changed in generations_loop (clean the stop
+variable).
+

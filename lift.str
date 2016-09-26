@@ -1,0 +1,338 @@
+
+                 /*********************************************/
+                 /*         Iterated Prisoner's Dilemma       */
+                 /*                                           */
+                 /*        Pour la Science, vol 181, Nov 92   */
+                 /*        Pour la Science, vol 187, Mai 93   */
+                 /*        IOS Press, Chaos and Society, 95   */
+                 /*                                           */
+                 /*        Authors: Philippe  MATHIEU         */
+                 /*                 Jean-paul DELAHAYE        */
+                 /*                                           */
+                 /*        Date  : 06/06/92                   */
+                 /*        maj   : 16/04/96                   */
+                 /*                                           */
+                 /*   e-mail : {mathieu, delahaye}@lifl.fr    */
+                 /*********************************************/
+
+
+
+/***************************************************************************
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Contact the authors for more details.
+*****************************************************************************/
+
+
+/* je joue c avec une proba a et t avec une proba 1-a tant que coups phas‰s.
+   au premier coup d‰phac‰ je joue (c t)* ou (t c)* selon le coup d‰phas‰
+   a est le pourcentage de coop‰ration sur 1000 
+*/
+
+card raison_a(int X, int a)
+{static counter dephase;
+	if (turn <= 1)
+	{       dephase[X]=0;
+		if (rand()%1000 < a) return COOPERATE;
+		else return DEFECT;
+	}
+	else
+	{       if (!dephase[X] && (RH[turn - 1] != MH[turn - 1]))
+			dephase[X]=1;
+		if (dephase[X]) 
+		{       if (MH[turn - 1]==COOPERATE) return DEFECT;
+			else return COOPERATE;
+		}
+		else 
+		{       if (rand()%1000 < a) return COOPERATE;
+			else return DEFECT;
+		}
+	}
+}
+
+card raison56(int X) {return raison_a(X,567); }
+card raison43(int X) {return raison_a(X,433); }
+card raison10(int X) {return raison_a(X,100); }
+card raison20(int X) {return raison_a(X,200); }
+card raison30(int X) {return raison_a(X,300); }
+card raison40(int X) {return raison_a(X,400); }
+card raison50(int X) {return raison_a(X,500); }
+card raison60(int X) {return raison_a(X,600); }
+card raison70(int X) {return raison_a(X,700); }
+card raison80(int X) {return raison_a(X,800); }
+card raison90(int X) {return raison_a(X,900); }
+
+
+
+
+/* je joue c avec une proba a et t avec une proba 1-a tant que coups phas‰s.
+   au premier coup d‰phas‰ je joue (c)* ou (t)* selon le coup d‰phas‰
+   a est le pourcentage de coop‰ration sur 1000 
+*/
+card raison_naif_a(int X, int a)
+{static counter dephase;
+	if (turn <= 1)
+	{       dephase[X]=0;
+		if (rand()%1000 < a) return COOPERATE;
+		else return DEFECT;
+	}
+	else
+	{       if (!dephase[X] && (RH[turn - 1] != MH[turn - 1]))
+			dephase[X]=1;
+		if (dephase[X]) 
+			return(MH[turn-1]);
+		else
+		{       if (rand()%1000 < a) return COOPERATE;
+			else return DEFECT;
+		}
+	}
+}
+
+card raison_naif_56(int X) {return raison_naif_a(X,567); }
+card raison_naif_50(int X) {return raison_naif_a(X,500); }
+
+
+
+card raison_douce_fausse(int X)
+/* a verifier l'appel a raison_a : comment doit etre considere dephase au premier appel ?     */
+{       if (turn <= 3) return COOPERATE;
+	else return raison_a(X,567);  /* big problem ! */
+}
+
+
+card raison_douce(int X)
+/* Je joue comme raison_56 sauf qu'aux 3 premiers coups je coopere     */
+/* tout ce passe comme si raison_56 etait appelee a partir du 3e coup  */
+{static counter dephase;
+       if (turn <= 3) return COOPERATE;
+	else
+	if (turn == 4)
+	{       dephase[X]=0;
+		if (rand()%1000 < 567) return COOPERATE;
+		else return DEFECT;
+	}
+	else
+	{       if (!dephase[X] && (RH[turn - 1] != MH[turn - 1]))
+			dephase[X]=1;
+		if (dephase[X]) 
+		{       if (MH[turn - 1]==COOPERATE) return DEFECT;
+			else return COOPERATE;
+		}
+		else 
+		{       if (rand()%1000 < 567) return COOPERATE;
+			else return DEFECT;
+		}
+	}
+}
+
+
+
+
+card gentille_raison_fausse(int X)
+/* a verifier l'appel a raison_a : comment doit etre considere dephase au premier appel ?     */
+{static counter trahis;
+	if (turn ==1 )
+	{       trahis[X]=0;
+		return COOPERATE;
+	}
+	else
+	{       if (!trahis[X] && RH[turn - 1] == DEFECT)
+			trahis[X]=1;
+		if (trahis[X]) return raison_a(X,567);  /* big problem */
+		else return COOPERATE;
+	}
+}
+
+
+
+card gentille_raison(int X)
+/* Je joue COOPERATE mais a la premiere trahison je joue raison_56       */
+/* tout ce passe comme si raison_56 etait appelee a la premier trahison  */
+{static counter nbdefect;
+static counter dephase;
+	if (turn==1 ) {nbdefect[X]=0; return COOPERATE;}
+	if (RH[turn-1]==DEFECT) nbdefect[X]++;
+	if (nbdefect[X]==0) return COOPERATE;
+	if (nbdefect[X]==1)
+	{       dephase[X]=0;
+		if (rand()%1000 < 567) return COOPERATE;
+		else return DEFECT;
+	}
+	else
+	{       if (!dephase[X] && (RH[turn - 1] != MH[turn - 1]))
+			dephase[X]=1;
+		if (dephase[X]) 
+		{       if (MH[turn - 1]==COOPERATE) return DEFECT;
+			else return COOPERATE;
+		}
+		else 
+		{       if (rand()%1000 < 567) return COOPERATE;
+			else return DEFECT;
+		}
+	}
+}
+
+
+
+card raison_prudente(int X)
+{static counter dephase, trois_suite;
+	if (turn <= 1)
+	{       dephase[X]=0;
+		trois_suite[X]=0;
+		if (rand()%1000 < 567) return COOPERATE;
+		else return DEFECT;
+	}
+	else
+	{       if (!dephase[X] && (RH[turn - 1] != MH[turn - 1]))
+			dephase[X]=turn-1;
+		if (dephase[X]) 
+		{       if (trois_suite[X]==0 && turn>=dephase[X]+3)
+				if (defect_lim(3,RH)==3)
+					trois_suite[X]=1;
+			if (trois_suite[X]) return DEFECT;
+			else
+			if (MH[turn - 1]==COOPERATE) return DEFECT;
+			else return COOPERATE;
+		}
+		else 
+		{       if (rand()%1000 < 567) return COOPERATE;
+			else return DEFECT;
+		}
+	}
+}
+
+
+
+card raison_dephasage_mult(int X)
+{static counter dephase, trois_suite;
+	if (turn <= 1)
+	{       dephase[X]=0;
+		trois_suite[X]=0;
+		if (rand()%1000 < 567) return COOPERATE;
+		else return DEFECT;
+	}
+	else
+	{       if (!dephase[X] && (RH[turn - 1] != MH[turn - 1]))
+			dephase[X]=turn-1;
+		if (dephase[X]) 
+		{       if (trois_suite[X]==0 && turn>=dephase[X]+3)
+				if (defect_lim(3,RH)==3)
+					trois_suite[X]=1;
+			if (trois_suite[X]) 
+			{       dephase[X]=0;
+				if (rand()%1000 < 567) return COOPERATE;
+				else return DEFECT;
+
+			}
+			else
+			if (MH[turn - 1]==COOPERATE) return DEFECT;
+			else return COOPERATE;
+		}
+		else 
+		{       if (rand()%1000 < 567) return COOPERATE;
+			else return DEFECT;
+		}
+	}
+}
+
+
+
+card raison_tft_a(int X, int a)
+{static counter dephase;
+	if (turn == 1)
+	{       dephase[X]=0;
+		if (rand()%1000 < a) return COOPERATE;
+		else return DEFECT;
+	}
+	else
+	{       if (!dephase[X] && (RH[turn - 1] != MH[turn - 1]))
+			dephase[X]=1;
+		if (dephase[X]) return RH[turn-1];  /* tft */
+		else 
+		{       if (rand()%1000 < a) return COOPERATE;
+			else return DEFECT;
+		}
+	}
+}
+
+
+
+card raison_tft_50(int X) {return raison_tft_a(X,500);}
+card raison_tft_10(int X) {return raison_tft_a(X,100);}
+card raison_tft_90(int X) {return raison_tft_a(X,900);}
+
+
+
+
+
+card jp_concours(int X)
+{static counter dephase;
+	if (turn == 1)
+	{	dephase[X]=0;
+		if (rand()%100 <= 50) return COOPERATE;
+		else return DEFECT;
+	}
+	else
+	{	if (turn % 20 == 0 && score(MH) < 3.5 * turn) dephase[X]=0;
+
+		if (!dephase[X] && (RH[turn - 1] != MH[turn - 1]))
+			dephase[X]=1;
+		if (dephase[X]) return RH[turn-1];  /* tft */
+		else 
+		{	if (rand()%100 <= 50) return COOPERATE;
+			else return DEFECT;
+		}
+	}
+}
+
+
+card phil_concours(int X)
+{static counter dephase;
+	if (turn == 1)
+	{	dephase[X]=0;
+		if (rand()%100 <= 50) return COOPERATE;
+		else return DEFECT;
+	}
+	else
+	{	if (turn % 20 == 0 && score(MH) < 3.5 * turn) dephase[X]=0;
+
+		if (!dephase[X] && (RH[turn - 1] != MH[turn - 1]))
+			dephase[X]=1;
+		if (dephase[X]) 
+		{	if (MH[turn - 1]==COOPERATE) return DEFECT;
+			else return COOPERATE;
+		}
+		else 
+		{	if (rand()%100 <= 50) return COOPERATE;
+			else return DEFECT;
+		}
+	}
+}
+
+
+card nous_concours(int X)
+{static counter dephase;
+	if (turn == 1)
+	{	dephase[X]=0;
+		if (rand()%100 <= 50) return COOPERATE;
+		else return DEFECT;
+	}
+	else
+	{	if (turn == 10 && score(MH) < 3 * turn) dephase[X]=0;
+		if (turn == 20 && score(MH) < 3 * turn) dephase[X]=0;
+
+		if (!dephase[X] && (RH[turn - 1] != MH[turn - 1]))
+			dephase[X]=1;
+		if (dephase[X]) 
+		{	if (MH[turn - 1]==COOPERATE) return DEFECT;
+			else return COOPERATE;
+		}
+		else 
+		{	if (rand()%100 <= 50) return COOPERATE;
+			else return DEFECT;
+		}
+	}
+}
+
+

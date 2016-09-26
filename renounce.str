@@ -1,0 +1,85 @@
+                 /*********************************************/
+                 /*         Iterated Prisoner's Dilemma       */
+                 /*                                           */
+                 /*        Pour la Science, vol 181, Nov 92   */
+                 /*        Pour la Science, vol 187, Mai 93   */
+                 /*        IOS Press, Chaos and Society, 95   */
+                 /*                                           */
+                 /*        Authors: Philippe  MATHIEU         */
+                 /*                 Jean-paul DELAHAYE        */
+                 /*                                           */
+                 /*        Date  : 06/06/92                   */
+                 /*        maj   : 16/04/96                   */
+                 /*                                           */
+                 /*   e-mail : {mathieu, delahaye}@lifl.fr    */
+                 /*********************************************/
+
+
+
+/***************************************************************************
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Contact the authors for more details.
+*****************************************************************************/
+
+
+
+/* La stratïgie prudente refuse de jouer dès la première partie. */
+card prudente(int X)
+{	return(RENOUNCE);
+}
+
+/* La stratïgie susceptible coopère tant que l'autre coopère et renonce Þ jouer dès que l'autre a trahit. */
+card susceptible(int X)
+{	if (turn==1) return COOPERATE;
+	else 
+		if (RH[turn - 1]==COOPERATE) return COOPERATE;
+		else return RENOUNCE;
+}
+
+/* La stratïgie indulgente coopère tant que dans les parties passïes l'autre n'a pas trahit plus de fois qu'il n'a coopïrï sinon elle refuse le jeu. */
+card indulgente(int X)
+{static counter nbc, nbt;
+	if (turn==1) {nbc[X]=0; nbt[X]=0; return COOPERATE;}
+	else
+	{	if (RH[turn -1 ]==DEFECT) nbt[X]++;
+		else nbc[X]++;
+		if (nbt[X]<=nbc[X]) return COOPERATE;
+		else return RENOUNCE;
+	}
+}
+
+
+/* La stratïgie dure trahit toujours tant que l'autre coopère et refuse de jouer dès qu'il a trahit. */
+card dure(int X)
+{	if (turn==1) return DEFECT;
+	else
+		if (RH[turn - 1]==COOPERATE) return DEFECT;
+		else return RENOUNCE;
+}
+
+
+/* La stratïgie random_echappement joue alïatoirement puis, Þ partir du coup 20, si son gain n'est pas supïrieur ou ïgal Þ 2*turn (une moyenne de 2 par coup) elle renonce Þ jouer. */
+card rand_echap(int X)
+{	if (turn < 20)
+		if (rand()%2) return COOPERATE; else return DEFECT;
+	else
+	{	if (score(MH)<2*turn) return RENOUNCE;
+		else 
+			if (rand()%2) return COOPERATE; else return DEFECT;
+	}
+}
+
+
+/* La stratïgie tit_for_tat_echappement joue tit_for_tat puis, Þ partir du coup 20, si son gain n'est pas supïrieur ou ïgal Þ 2*turn (une moyenne de 2 par coup) elle renonce Þ jouer. */
+card tft_echap(int X)
+{	if (turn == 1) return COOPERATE;  /* tft */
+	if (turn < 20) return RH[turn-1];  /* tft */
+	else
+	{	if (score(MH)<2*turn) return RENOUNCE;
+		else return tit_for_tat(X);
+	}
+}
+
+

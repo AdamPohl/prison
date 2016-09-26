@@ -1,0 +1,47 @@
+#!/bin/sh
+
+## verification du fichier de traduction
+fichier="translat.nam"
+if [ ! -f $fichier ]; then
+    echo "erreur : fichier de traduction ($fichier) introuvable."
+    exit 1
+fi
+
+## les parametres de sens (colonne 1 = english et colonne 2 = francais0
+if [ "$1" = "f" ]; then
+    echo "Traduction de l'anglais vers le francais :"
+    from="1"
+    to="2"
+elif [ "$1" = "e" ]; then
+    echo "Traduction du francais vers l'anglais :"
+    from="2"
+    to="1"
+else
+    echo "usage: `basename $0` <f|e> [fichiers]"
+    echo "        f : pour traduire en francais"
+    echo "        e : pour traduire en anglais"
+    exit 0
+fi
+
+## les fichiers a changer
+if [ $# -ge 2  ]; then
+    shift
+    liste=$* 
+else
+    liste=`ls *.str strategy.h`
+fi
+
+## la traduction
+for i in $liste
+do
+    echo -n Traduction de $i ...
+    sed \
+	`awk '/^[^#].*/ {print length($'$from')" "$'$from'" "$'$to'}' \
+	    $fichier \
+	| sort -n -r \
+	| awk 'BEGIN {ORS=" "} {print "-e  s/"$2"/"$3"/g"}'` \
+    $i >$i.new
+    rm $i
+    mv $i.new $i
+    echo fini
+done 

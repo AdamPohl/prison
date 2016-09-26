@@ -1,0 +1,47 @@
+#
+# Attention aucun sous-mot d'une des listes ne doit etre mot d'une autre,
+# sinon il y aura double substitution.
+# Aucun mot utilise comme mot, ou sous-mot dans les sources ne doit etre
+# present dans ces listes (exple : defect car utilise dans defect_lim).
+#
+#       English                 Francais
+#
+	better_and_better       mieux_en_mieux
+	c_then_per_dc           c_puis_per_tc
+	all_c			gentille
+	calculator              calculateur
+	all_d			mechante
+	doubler                 doubleur
+	easy_go                 easy_go
+	gradual                 graduel
+	gradual_killer          graduel_killer
+	hard_joss               joss_dur
+	hard_majo               majo_dur
+	hard_prober             sondeur_dur
+	hard_tf2t               tf2t_dur
+	hard_tft                tft_dur
+	ipd_random              lunatique
+	mistrust                mefiant
+	pavlov                  pavlov
+	per_ccccd               per_cccct
+	per_cccdcd              per_ccctct
+	per_ccd                 per_cct
+	per_cd			per_ct
+	per_ddc                 per_ttc
+	prober                  sondeur
+	prober2                 sondeur2
+	prober3                 sondeur3
+	prober4                 sondeur4
+	slow_tft                slow_tft
+	soft_joss               joss_mou
+	soft_majo               majo_mou
+	soft_spiteful           rancunier_mou
+	soft_tf2t               tf2t_mou
+	spiteful                rancuniere
+	tit_for_tat             donnant_donnant
+	worse_and_worse         pire_en_pire
+	worse_and_worse2        pire_en_pire2
+	worse_and_worse3        pire_en_pire3
+#
+# Next line must be the last line of the file (no blank lines).
+#

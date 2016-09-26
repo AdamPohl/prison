@@ -1,0 +1,607 @@
+   ======================================================================
+                        Iterated Prisoner's Dilemma
+    --------------------------------------------------------------------
+                        Authors : Philippe MATHIEU
+                                  Jean-Paul DELAHAYE
+                                  Bruno BEAUFILS
+    --------------------------------------------------------------------
+             PRISON, Copyright (C) 1992-1998 by LIFL (SMAC team)
+   ======================================================================
+
+
+ THIS PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL, BUT WITHOUT
+    ANY WARRANTY; WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR
+  FITNESS FOR A PARTICULAR PURPOSE. CONTACT THE AUTHORS FOR MORE DETAILS.
+
+    Please contact us for any bug, any difficulty or any improvement idea.
+              Please take last version on http://www.lifl.fr/IPD
+
+     Please send us an e-mail if you use this software. With your address
+   We will be able to tell you if there has been changes in the new version
+                or to give new contributions (prison@lifl.fr)
+
+
+INTRODUCTION
+============
+
+Let two artificial agents have the choice between cooperation and defection.
+They play one against the other, in a synchronous manner, so that they do
+not know what the other will play. They get a score according to the
+situation of the move:
+
+   * They both cooperate and then get both the cooperation reward, let
+     evaluate it to R points;
+   * They both defect and then get both the selfish punishment, let evaluate
+     it to P points;
+   * One chooses to defect while the other chooses to cooperate, then the
+     one who has defected gets the selfish temptation salary, let it be T
+     points, and the one who has cooperated gets the sucker score, let it be
+     S points.
+
+To have a dilemma, temptation must be better than cooperation, which must be
+better than punishment, which must be better than to be the sucker. This can
+be formalised as: T>R>P>S
+
+Since this one-shot version of the Prisoner's Dilemma is not very
+interesting (the most rational choice is to defect), the game is iterated,
+the final score being the sum of all the moves scored. Each player does not
+know how many moves there will be, thus each agent's strategy can be
+studied, to look, for instance, how each player tries to put cooperation in
+the game.
+
+To avoid the one-shot Prisoner's Dilemma solution to influence strategies,
+by giving too much importance to temptation regarding cooperation, it is
+useful to add the following restriction : 2R>T+S
+
+With this restriction, strategies have no advantage in alternatively operate
+and defect.
+
+To study the behavior of strategies, two kinds of computation can be done.
+
+The first one is a simple round-robin tournament, in which each strategy
+meets all other strategies. Its final score is then the sum of all scores
+done in each confrontation. At the end, the strategy's strength measurement
+is given by its range in the tournament.
+
+The second one is a simulated ecological evolution, in which at the
+beginning there is a fixed population including the same quantity of each
+strategy. A round-robin tournament is made and then the population of bad
+strategies is decreased whereas good strategies obtain new elements. The
+simulation is repeated until the population has been stabilised (the
+population does not change anymore). This is this way that nasty strategies,
+those who take the initiative of the first defection, have been discovered
+to be not very stable, because they are invaded by kind ones.
+
+
+PRESENT VERSION
+===============
+
+This version allows you to simulate the Iterated Prisoner's Dilemma with
+many options as well as other variants like Leader's Dilemma, Lift Dilemma,
+renouncement Dilemma etc... in simple round robin tournament or in
+ecological evolution. For each experiment you can obtain many traces and a
+graphical representaton of population evolution.
+
+This program allows you to create your own strategies and make them enter in
+competition with the choosen panel.
+
+In this aim, this package contains more than 50 strategies to play the game.
+
+This program is able to give you in output not only graphical
+representations of ecological evolutions but also a trace of each
+confrontation made, a trace of the total score table after tournament or a
+trace of ecological computation generations (1 every 10 generations).
+
+You also obtain analysis of each round-robin tournament made, with, for each
+strategy the best gap, worst gap, best score, worst score it obtained.
+
+It is written in standard Ansi C to allow you to compile the program code
+with your strategies on any system. Actually it has been tested on many Unix
+systems, on DOS 6.x and Windows 3.x and 4.x
+
+This program is initially configured to run with the 12 strategies described
+in the article "L'altruisme perfectionne" published in "Pour La Science"
+revue, vol 181, Nov 92 as well as with for the 21 strategies of the internal
+publication IT 233 of the LIFL (ftp.lifl.fr in pub/reports/IT-publi)
+
+The following points indicate the way to follow to run this program, change
+strategies or add yours.
+
+If you have any problem, you can send me an e-mail at mathieu@lifl.fr. I
+will answer you, if i can, i soon as possible.
+
+
+PACKAGES CONTENTS
+=================
+
+   * In the prison directory
+      changes      Traces of last modifications to the package
+      readme       The file you are already reading
+      prison.c     Source program for IPD simulator
+      tinypri.c    Source program for a light version of the IPD simulator
+      getopt.c     internal file under GNU licence
+      getopt.h     internal file under GNU licence
+      strategy.h   Strategies list used by the program
+      classics.str Classical strategies used by default
+      renounce.str Strategies code for renouncement
+      lift.str     Strategies code for lift dilemma
+
+      pls.str      Strategies code for the tournament made with PLS 187,
+                   Mai 93
+      misc.str     Several other strategies
+      slaves.str   A master-slaves model
+      translat.nam correspondance between French and English strategy names
+      translat     script for Unix to translate from English to French
+      makefile     makefile to build all versions under Unix system
+      interface.c  Files used for the GUI of prison (xprison)
+      mainwindow.c
+      setupwindow.c
+      tracewindow.c
+      xmain.c
+      sample1      examples saved to run with xprison
+      sample2
+      sample3
+      sample4
+   * In the prison/dos directory
+
+      prison16.exeexecutable for DOS, Windows 3.1, Windows 95 and W/NT in
+                  16 bits
+      prison32.exeexecutable only for Windows 95 and Windows NT in 32 bits
+      tinypri.exe lightversion of the executable for DOS in 32 bits
+      gnuplot.exe The gnuplot executable
+
+
+VARIANTS
+========
+
+You can run many IPD variants at the command line. For example these are
+some possible games :
+
+ Prisoner's dilemma            : prison
+ Prisoner's dilemma with noise : prison -N5 (for 5% noise)
+
+ Prisoner's dilemma with loss  : prison -L50 (for 50 loss at each
+                                 generation)
+ Leader's dilemma              : prison -s3 -p0 -r1
+ Lift dilemma                  : prison -t8
+
+
+COMPILATION
+===========
+
+This program has been entirely written in ANSI C. You just have to compile
+the file prison.c to obtain a new runable program.
+
+If you are under Unix, you have already access to a C compiler and to the
+MAKE utility. You just have then to run
+
+    make prison
+    or
+    make tinypri
+    or
+    make xprison
+
+If you are under DOS and have Turbo C, you just have to run
+
+    tc prison.c /b
+    or
+    tc tinypri.c /b
+
+Remember : runable versions already exist in the archive for 16 bits
+(Windows 3.1 or DOS) as well as 32 bits (Windows 95 or NT)
+
+
+MATRIX PAYOFF
+=============
+
++----------------+---------------+---------------+---------------+
+|                |               |               |               |
+|                |  COOPERATE    |     DEFECT    |     RENOUNCE  |
+|                |               |               |               |
+|----------------+---------------+---------------+---------------|
+|                |               |               |               |
+|  COOPERATE     |   (R)eward    |    (S)ucker   |   N           |
+|                |               |               |               |
+|----------------+---------------+---------------+---------------|
+|                |               |               |               |
+|  DEFECT        | (T)emptation  |  (P)unishment |   N           |
+|                |               |               |               |
+|----------------+---------------+---------------+---------------|
+|                |               |               |               |
+|  RENOUNCE      |   N           |   N           |   N           |
+|                |               |               |               |
++----------------+---------------+---------------+---------------+
+
+
+HOW TO RUN IT
+=============
+
+prison          run the program with default options
+
+The program prints on the screen all the parameters used such as the number
+of strategies that will be in tournament.
+
+Many parameters can be changed on the command line:
+
+prison -h       gives this help message
+
+-r <int>    double cooperation value (R)eward           (default 3)
+-p <int>    double defect value (P)unishment            (default 1)
+-t <int>    defect against cooperate (T)emptation       (default 5)
+-s <int>    cooperate against defect (S)ucker's score   (default 0)
+-n <int>    Renouncement                                (default 2)
+-l <int>    confrontation (l)ength                      (default 1000)
+-R <int>    number of random strategies (R)epetition    (default 8)
+-g <int>    number of (g)enerations computed            (default until stab.)
+-S <int>    (S)eed value : 0 if real random game        (default 1)
+-L <int>    (L)oss in each generation                   (default 0)
+-N <int>    percentage (N)oise value                    (default 0)
+-a <string> strategies subclass taken into (a)ccount    (default all)
+            (y|n)* or list of strategy number separated by commas
+-o          (o)utput usable strategies list
+-h          this help message
+
+The program have initially classical strategies in its memory. They are all
+described in the classics.str file.
+
+The -o option gives you the list of all the strategies you can run with
+their respective number.
+
+The -a option allows you to make any confrontation you want between a
+subclass of these classical strategies. You just have to pass an argument
+composed of y (for yes) and n (for no) which means that strategies on index
+corresponding to a 'y' in the string are choosen. You can also specify the
+strategies you want by their number separated by commas. If this option is
+not used (default) all the strategies are used.
+
+The -L option allows to use a loss perturbation during the computation. At
+each generation loop, a few number of entities will be destroyed randomly.
+The number of destroyed entities must be specified after the -L.
+
+The -N option allows tou to play the game with noise. This option uses a
+percentage which defines the noise probability. For example -N5 will change
+the play in 5% times.
+
+At each run, a file with .bat suffix is created to allow you to recall the
+parameters used for this experiment. If you are under DOS you just have to
+run this bat file again to run the same experiment with the same options. If
+you are under Unix you will just have to change its mode (chmod *.bat +x) to
+be able to run it.
+
+If a graphical representation is asked, the plotter GNUPLOT will be
+automatically runned to show the plot result. Be sure GNUPLOT can be
+accessed in you PATH variable.
+
+
+MANY OTHER TOURNAMENTS
+======================
+
+To specify a subclass of strategies for confrontation you know that you must
+use the -a option with (y|n)* string. Of course if there are 33 strategies
+and you just want the first ones you dont have to build a string of length
+33. If string is less than 33 in length no other strategies will no be used.
+
+When you choose some strategies you must respect the order of the 'foreseen'
+array (which contains the subclass expected) in the file 'strategies'
+
+prison -o gives you this order on the screen 1 gentille 2 mechante 3
+lunatique 4 tit_for_tat 5 rancuniere 6 per_mechante 7 per_gentille 8
+majo_mou 9 mefiant 10 majo_dur 11 sondeur 12 tft_dur 13 gradual 14 tf2t_hard
+15 tf2t_kind 16 joss_dur 17 joss_mou 18 coop_puis_tc 19 hesitante 20 ccctct
+21 c_4_sur_5 22 quatre_c_un_t 23 calculateur 24 sondeur2 25 sondeur3 26
+sondeur4 27 sondeur_dur 28 mieux_en_mieux 29 pire_en_pire 30 pire_en_pire2
+31 pire_en_pire3 32 doubleur 33 ranc_mou 34 pavlov 35 gradual_killer 36
+slow_tft
+
+
+SOME EXAMPLES
+=============
+
+to obtain the help message
+     prison -h
+to obtain the list of allowed strategies
+     prison -o
+classical IPD simulation between the classical strategies
+     prison
+classical simulation between gentille, mechante and lunatique
+     prison -a yyy
+classical simulation between gentille, tit_for_tat, per_mechante and sondeur
+     prison -a 1,4,6,11
+simulation between mechante and gentille
+     prison -a yy
+simulation between mechante and tit_for_tat with a LOSS of 5 death in each
+loop
+     prison -a nyny -L5
+simulation between mechante, tit_for_tat and gentille with a real random
+seed and a game length of 10 rounds
+     prison -a 1,2,4 -S 0 -l 10
+simulation between the 11th first deterministic strategies with a score of 6
+for DEFECT against COOPERATION
+     prison -t 6 -a yynyyyyyyyyy
+simulation between mechante, majo_dur, majo_mou, mefiant and graduel at the
+lift dilemma with seed fixed at 5
+     prison -t8 -a 2,8,9,10,13 -S5
+simulation between gentille lunatique and rancuniere at the lift dilemma
+with a real random seed and a game length of 10 rounds
+     prison -a ynyny -t8 -S0 -l10
+
+
+USING THE SIMULATOR
+===================
+
+PROGRAM PARAMETERS
+------------------
+
+                      game length and score computation
+
+This program is arranged to run 1000 play games by default You can change it
+with -l
+
+Scores are computed in the following way (Classical IPD)
+
+   * double cooperation value: 3 points each
+   * double defect value: 1 point each
+   * renouncement : 2 points each
+   * defect against cooperate : resp. 5 et 0 points.
+
+You can change this with -r -p -t -n -s
+
+Each game with a random strategy is played 8 times to obtain a more reliable
+behavior. You can change this with -S
+
+For example, to play
+
+   * Lift dilemma : prison -t8
+   * Leader's dilemma : prison -r1 -s3 -p0
+   * IPD with noise : prison -N5
+   * IPD with loss : prison -L80
+
+                               random generator
+
+If some of the strategies uses a random generator you will have many
+difficulties to obtain the same result between two identical experiments.
+
+Initially the random generator seed is fixed to 1. By this way, all your
+experiments can be reproduced exactly.
+
+You can change the seed with the -S option. If you use -S0 then a real
+random generator will be used.
+
+By the same way, each game with a random strategy is played 8 times. You can
+also change this with the -R option
+
+                            Messages signification
+
+* Tournament, Generations, Subclass, Domination, Cycles (T/G/S/D/C) ?
+
+T) You run a round robin tournament between all the choosed strategies.
+
+G) Not only you run a round robin tournament but you also count scores in
+population and you iterate this process until stabilization.
+
+S) Subclass allows you to compute all the confrontations between all the
+chosen strategies except 1 or 2. With n choosen strategies it will then run
+n confrontations if you choose the (n-1) option and (n(n-1)/2) with the
+(n-2) option.
+
+D) Domination allows you to know if between the chosen strategies one of
+them wins against all the others in a two by two tournament. You can choose
+between weak or strong domination according to counting score against itself
+or not.
+
+C) Cycles allows you to know if between the chosen strategies you can find
+loops of 3 winning strategies : A wins against B, B wins against C and C
+wins against A in a 2 by 2 tournament. You can choose between weak or strong
+cycles according to counting score against itself or not.
+
+* Output files prefix name ?
+
+After each experiment the program is able to keep trace of many results
+obtained in different files. All these generated files for an
+experimentation will have the same prefix name. This allows you to find them
+easily if you make many experimentations.
+
+* Trace of each confrontation (Y/N) ?
+
+You can have, for each game played, the 30 first plays by strategies in each
+confrontation. The program prints also, for each game the score obtained by
+each strategy. If this trace is asked it will be written (in Ascii) in a
+.trace suffix file
+
+* Trace of the total score table after tournament (Y/N) ?
+
+You can obtain a trace of the cumulative score table after the round robin
+tournament for each strategy. This output will be sorted by decreasing order
+of the population quantity (The winner is at the top). If this trace is
+asked it will be written (in Ascii) in a .trace suffix file
+
+* Trace of ecological computation generations (1/10) (Y/N) ?
+
+You can obtain every 10 generations the intermediary state of the entities
+population during ecological computation. All these results are sorted by
+decreasing order of the population quantity This can of course be obtained
+only if you asked for Generation at the first query. If this trace is asked
+it will be written (in Ascii) in a .trace suffix file
+
+* Trace of score matrix (Y/N) ?
+
+If you want to obtain a matrix representation of the scores between two
+strategies, you can have it with this option. This matrix can be easily
+loaded in your SpreadSheet for a pretty presentation. If this trace is asked
+it will be written (in Ascii) in a .trace suffix file
+
+If you asked for Subclass
+
+    * Tournament or Generations ?
+    
+    T or G for choosing between an autotest on tournaments or an autotest on
+    generations.
+    
+    * Size of subclasses ?
+    
+    the size of the subclasses you want to compute. Be careful to what you
+    asked for, it can take a long time !
+
+If you asked for Domination
+
+    * Strong or weak domination (1/2) :
+    
+    1 or 2 for choosing if in a round robin tournament a strategy plays
+    against itself.
+    
+If you asked for Cycles
+
+    * Strong or weak cycle (1/2) :
+    
+    1 or 2 for choosing if in a round robin tournament a strategy plays against
+    itself.
+    
+* File for graphics output (Y/N) ?
+
+This will create a text file which can be used by a plotter. It contains the
+complete not sorted trace of populations during time. This file can easily
+be loaded in your SpreadSheet to obtain a good graphical representation. It
+can also be used by GNUPLOT by simply running 'gnuplot *.cmd' (* is the
+prefix name choosed before) at the end of the computation.
+
+If this trace is asked it will be written (in Ascii) in a .data suffix file
+and the GNUPLOT commands in a .cmd suffix file. The file .cmd is
+automatically created to plot only the 20th best first strategies of the
+ecological evolution.
+
+Be sure to have GNUPLOT access in your PATH for this option.
+
+GENERATED FILES
+---------------
+
+   * .bat file generated which contains the command line used for this
+     experimentation
+   * .tra file generated which contains games trace, scores and evolutions
+     depending what you asked for.
+   * .dat file generated which contains data for a graphical representation
+     of population evolution
+   * .cmd file generated which contains GNUPLOT commands to obtain a
+     postscript file
+   * .ps file generated which contains the postscript graphic file of the
+     evolution.
+
+
+ADDING STRATEGIES
+=================
+
+STRATEGY CREATION
+-----------------
+
+You must write strategies in C language, but a rough knowledge of this
+language is sufficient to write many kinds of strategies.
+
+Each strategy corresponds to a C function which has for input parameter an
+int X and which has for output a card type which is DEFECT, COOPERATE or
+RENOUNCE.
+
+Each play of any player can be seen in history arrays. You can access to
+MH[] (for my_history) and RH[] (for rival's history). For example MH[53] is
+my play at the 53rd play.
+
+The number of the current play can be obtained with the 'turn' variable.
+
+Warning, players plays simultaneously thus it is not possible to obtain the
+rival's play at the 'turn' play.
+
+If you want to use static variables to write your strategy like counters,
+you can do it but you must declare these variables with a "static counter"
+type. When you use it , you must always use it like an array at the X index.
+Of course X must not be changed. See "graduel" strategy for an example.
+
+UTILITIES
+---------
+
+Some utility functions have been written to help you to write your own
+strategies :
+
+   * nbC(MH), nbC(RH) returns the number of cooperations made by me or my
+     rivals since the beginning of the game.
+   * nbD(MH), nbD(RH) returns the number of defections made by me or my
+     rival since the beginning of the game.
+   * score(MH), score(RH) returns my current score or the current score of
+     my rival since the beginning of the game.
+   * score_lim(n,MH) , score_lim(n,RH) returns my score or the score of my
+     rival during the n last plays.
+   * defect_lim(n,MH), defect_lim(n,RH) returns my number of defections or
+     the defections of my rival during the n last plays.
+
+Example : I want to write a strategy which plays COOPERATE if the rival has
+COOPERATE at least as much as me, and which plays RENONCE if it has not
+obtained more than 10 points during the last 5 plays. It DEFECTs in the
+other cases.
+
+ card essai(int X)
+ {
+      if (nbC(RH)>=nbC(MH) return COOPERATE;
+      if (turn>5 && score_lim(5,MH)<10) return RENOUNCE;
+      return DEFECT;
+ }
+
+HOW TO ADD A NEW STRATEGY
+-------------------------
+
+After having written your own strategy, how can you add your strategy to the
+current panel ?
+
+In fact you just have to edit the file 'strategies' with your usual editor.
+You can of course use a variant of one of the strategies which you will find
+in str* files.
+
+  1. At the beginning of 'strategies' you write your strategy in the correct
+     format (see below) Be sure that there is no other strategy with the
+     same name.
+  2. Then you must declare this new strategy in the array just at the end.
+     Each record must be in this format:
+
+       "extern_name",internal_name,100,0,X,0,
+
+        o extern_name is the name that you want to see in the results and
+          graphics.
+        o internal_name is the name of the procedure coding your strategy
+        o The third parameter is the size of initial population for
+          ecological evolutions. Usually we put 100 for all of them.
+        o 0 is required as 4th argument
+        o X must be replaced by 0 or 1. 0 if your strategy does not make use
+          of random and 1 if there is any rand() in it.
+        o 0 is required at last argument
+     For example if you want to see invasion phenomena like 100 tit_for_tat
+     invading 900 m?chantes, you must initialize the strategy array with
+     these 2 lines.
+
+         "tit_for_tat",tit_for_tat,100,0,0,0,
+         "mechante",mechante,900,0,0,0,
+
+  3. save the 'strategy.h' file
+  4. recompile prison.c with your C compiler
+
+     Warning: This program is configured to use 50 strategies maximum.
+     This is defined in the constant NB_STRAT_MAX at the beginning of
+     prison.c If you want to use more than 50 strategies, change this
+     constant. Under DOS you will perhaps have to compile with Compact
+     or Large model if your code is too important.
+
+WARNING
+=======
+
+If you change anything in this program, be sure to avoid an overflow error
+in arithmetic computations
+
+Sensitive variables are score_matrix, sum, ent_for_one and total Which are
+used in generations_loop
+
+max values :
+
+   * score_matrix: GAME_LENGTH * max_pts
+   * cumul: NB_STRATEGIES * GAME_LENGTH * max_pts
+   * ent_for_one: NB_STRATEGIES * pop_init * GAME_LENGTH * max_pts
+   * total: NB_STRATEGIES * NB_STRATEGIES * pop_init * pop_init *
+     GAME_LENGTH * max_pts
+
+  ----------------------------------------------------------------------
+               Copyright (C) 1992-1998 by LIFL <prison@lifl.fr>
+                       Last modified: 1998/11/20 - 2:2
